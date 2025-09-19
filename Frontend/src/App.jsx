@@ -5,8 +5,9 @@ import Dashboard from './components/Dashboard/Dashboard';
 import Research from './components/Research/Research';
 import Grading from './components/Grading/Grading';
 import StudentChat from './components/Chat/StudentChat';
+import { AppProvider } from './context/AppContext';
 
-const App = () => {
+const AppContent = () => {
   const [activeTab, setActiveTab] = useState('research');
 
   const renderActiveTab = () => {
@@ -35,4 +36,13 @@ const App = () => {
   );
 };
 
+const App = () => {
+  return (
+    <AppProvider>
+      <AppContent />
+    </AppProvider>
+  );
+};
+
 export default App;
+
