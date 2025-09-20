@@ -14,6 +14,35 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
+### 
+# NEW CODE STARTS HERE
+
+# Get port from environment variable (required for deployment)
+PORT = int(os.environ.get("PORT", 8000))
+
+# Check for API keys
+ANTHROPIC_KEY = os.getenv("ANTHROPIC_API_KEY")
+OPENAI_KEY = os.getenv("OPENAI_API_KEY")
+HAS_API_KEYS = bool(ANTHROPIC_KEY and ANTHROPIC_KEY.startswith("sk-"))
+
+print(f"API Keys available: {HAS_API_KEYS}")
+
+# Only import agent components if keys are available
+if HAS_API_KEYS:
+    try:
+        from main import agent_executor, parser, ResearchResponse
+        print("✅ Research agent loaded successfully")
+        AGENT_AVAILABLE = True
+    except Exception as e:
+        print(f"❌ Failed to load research agent: {e}")
+        AGENT_AVAILABLE = False
+else:
+    print("⚠️ No API keys found - running in mock mode")
+    AGENT_AVAILABLE = False
+    
+### 
+# NEW CODE ENDS HERE
+    
 # Create FastAPI app
 app = FastAPI(
     title="Academic Research Agent API",
@@ -24,7 +53,13 @@ app = FastAPI(
 # Configure CORS to allow your React frontend
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:5173", "http://localhost:3000"],  # Vite and CRA ports
+    allow_origins=[
+        "http://localhost:5173", 
+        "http://localhost:3000",
+        "https://*.vercel.app",
+        "https://https://academic-agent.vercel.app/"
+    ],
+    # Vite and CRA ports
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -232,14 +267,17 @@ async def root():
 
 if __name__ == "__main__":
     print("Starting Academic Research Agent API...")
+    print(f"📊 Mode: {'Real AI' if AGENT_AVAILABLE else 'Mock Mode'}")
+    print(f"🔧 Port: {PORT}")
     print("Frontend should be running on http://localhost:5173")
     print("API will be available on http://localhost:8000") 
     print("API Documentation: http://localhost:8000/docs")
     
     uvicorn.run(
         "api_server:app",
-        host="127.0.0.1",
-        port=8000,
-        reload=True,
-        log_level="info"
+        host="0.0.0.0",
+        # host="127.0.0.1",
+        port=PORT,
+        reload=False
+        # log_level="info"
     )
