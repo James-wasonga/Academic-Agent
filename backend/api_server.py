@@ -1,4 +1,4 @@
-# from fastapi import FastAPI, HTTPException
+ # from fastapi import FastAPI, HTTPException
 # from fastapi.middleware.cors import CORSMiddleware
 # from pydantic import BaseModel
 # from typing import List, Optional
@@ -588,6 +588,195 @@
 #         workers=1      # Single worker for free tier
 #     )
 
+# WORKING ONE
+
+# from fastapi import FastAPI, HTTPException
+# from fastapi.middleware.cors import CORSMiddleware
+# from pydantic import BaseModel
+# from typing import List, Optional
+# import uvicorn
+# from datetime import datetime
+# import os
+# from dotenv import load_dotenv
+
+# load_dotenv()
+
+# PORT = int(os.environ.get("PORT", 8000))
+# GEMINI_KEY = os.getenv("GEMINI_API_KEY")
+# HAS_GEMINI = bool(GEMINI_KEY and len(GEMINI_KEY) > 20)
+
+# print(f"Port: {PORT}")
+# print(f"Gemini Key: {'Available' if HAS_GEMINI else 'Missing'}")
+
+# # Simple research function using Gemini directly
+# def gemini_research(query: str) -> dict:
+#     """Direct Gemini API call for research"""
+#     if not HAS_GEMINI:
+#         return fallback_research(query)
+    
+#     try:
+#         import google.generativeai as genai
+#         genai.configure(api_key=GEMINI_KEY)
+        
+#         model = genai.GenerativeModel('gemini-1.5-flash')
+        
+#         prompt = f"""
+#         You are a research assistant. Research the topic: "{query}"
+        
+#         Provide a comprehensive response with:
+#         1. A detailed summary of the topic
+#         2. Key findings and insights
+#         3. Relevant sources and references
+        
+#         Format your response as a research analysis.
+#         """
+        
+#         response = model.generate_content(prompt)
+        
+#         return {
+#             "topic": query,
+#             "summary": response.text,
+#             "sources": "Generated using Gemini AI with access to trained knowledge base",
+#             "tool_used": ["gemini-ai", "knowledge-base"],
+#             "timestamp": datetime.now().isoformat(),
+#             "id": f"research_{datetime.now().timestamp()}",
+#             "mode": "real_ai"
+#         }
+        
+#     except Exception as e:
+#         print(f"Gemini research error: {e}")
+#         return fallback_research(query)
+
+# def fallback_research(query: str) -> dict:
+#     """Fallback research"""
+#     return {
+#         "topic": query,
+#         "summary": f"Unable to perform real AI research for '{query}'. Please check API configuration.",
+#         "sources": "Fallback mode - no real sources available",
+#         "tool_used": ["fallback"],
+#         "timestamp": datetime.now().isoformat(),
+#         "id": f"research_{datetime.now().timestamp()}",
+#         "mode": "fallback"
+#     }
+
+# app = FastAPI(title="Academic Research Agent API", version="1.0.0")
+
+# app.add_middleware(
+#     CORSMiddleware,
+#     allow_origins=["*"],
+#     allow_credentials=True,
+#     allow_methods=["*"],
+#     allow_headers=["*"],
+# )
+
+# class ResearchRequest(BaseModel):
+#     query: str
+#     tools: Optional[List[str]] = ["search", "wiki", "save"]
+
+# class GradingRequest(BaseModel):
+#     code: str
+#     language: str = "python"
+#     assignment_id: Optional[str] = None
+
+# @app.post("/api/research")
+# async def research_endpoint(request: ResearchRequest):
+#     try:
+#         result = gemini_research(request.query)
+#         print(f"Research completed for: {request.query} (Mode: {result.get('mode')})")
+#         return result
+#     except Exception as e:
+#         print(f"Research endpoint error: {e}")
+#         return fallback_research(request.query)
+
+# @app.post("/api/grading/analyze")
+# async def analyze_code(request: GradingRequest):
+#     try:
+#         import ast
+        
+#         score = 100
+#         feedback = []
+#         suggestions = []
+#         strengths = []
+        
+#         if request.language.lower() == "python":
+#             try:
+#                 tree = ast.parse(request.code)
+                
+#                 has_functions = any(isinstance(node, ast.FunctionDef) for node in ast.walk(tree))
+#                 has_classes = any(isinstance(node, ast.ClassDef) for node in ast.walk(tree))
+#                 has_try_except = any(isinstance(node, ast.Try) for node in ast.walk(tree))
+                
+#                 if has_functions:
+#                     strengths.append("Good use of functions for code organization")
+#                 else:
+#                     feedback.append({
+#                         "type": "warning",
+#                         "message": "Consider breaking code into functions for better organization",
+#                         "line": None
+#                     })
+#                     score -= 10
+                
+#                 if has_classes:
+#                     strengths.append("Object-oriented programming implementation")
+                
+#                 if not has_try_except and len(request.code.split('\n')) > 10:
+#                     suggestions.append("Add error handling with try-except blocks")
+#                     score -= 5
+                
+#                 if not strengths:
+#                     strengths.append("Code compiles successfully")
+                    
+#             except SyntaxError as e:
+#                 feedback.append({
+#                     "type": "error", 
+#                     "message": f"Syntax error: {e.msg}",
+#                     "line": e.lineno
+#                 })
+#                 score -= 30
+        
+#         return {
+#             "score": max(0, score),
+#             "feedback": feedback,
+#             "suggestions": suggestions,
+#             "strengths": strengths,
+#             "timestamp": datetime.now().isoformat(),
+#             "language": request.language
+#         }
+        
+#     except Exception as e:
+#         raise HTTPException(status_code=500, detail=str(e))
+
+# @app.get("/health")
+# async def health_check():
+#     return {
+#         "status": "healthy",
+#         "service": "Academic Research Agent API", 
+#         "port": PORT,
+#         "api_keys": {"gemini": HAS_GEMINI},
+#         "real_ai": HAS_GEMINI,
+#         "mode": "real_ai" if HAS_GEMINI else "fallback",
+#         "message": "API is running"
+#     }
+
+# @app.get("/")
+# async def root():
+#     return {
+#         "message": "Academic Research Agent API",
+#         "status": "running", 
+#         "mode": "real_ai" if HAS_GEMINI else "fallback",
+#         "docs": "/docs"
+#     }
+
+# @app.get("/api/research/history")
+# async def get_research_history():
+#     return {"history": []}
+
+# @app.get("/api/grading/history") 
+# async def get_grading_history():
+#     return {"history": []}
+
+# if __name__ == "__main__":
+#     uvicorn.run(app, host="0.0.0.0", port=PORT, reload=False)
 
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
@@ -598,8 +787,10 @@ from datetime import datetime
 import os
 from dotenv import load_dotenv
 
+# Load environment variables
 load_dotenv()
 
+# Configuration
 PORT = int(os.environ.get("PORT", 8000))
 GEMINI_KEY = os.getenv("GEMINI_API_KEY")
 HAS_GEMINI = bool(GEMINI_KEY and len(GEMINI_KEY) > 20)
@@ -607,9 +798,26 @@ HAS_GEMINI = bool(GEMINI_KEY and len(GEMINI_KEY) > 20)
 print(f"Port: {PORT}")
 print(f"Gemini Key: {'Available' if HAS_GEMINI else 'Missing'}")
 
-# Simple research function using Gemini directly
+# ========================
+# Utility Functions
+# ========================
+
+def format_research_response(topic: str, summary: str, sources: str, tool_used: List[str], mode: str) -> dict:
+    """
+    Create a well-structured and formatted research response.
+    """
+    return {
+        "topic": topic,
+        "summary": f"### Research Summary\n\n{summary.strip()}",
+        "sources": f"### Sources & References\n\n{sources}",
+        "tool_used": tool_used,
+        "timestamp": datetime.now().isoformat(),
+        "id": f"research_{datetime.now().timestamp()}",
+        "mode": mode
+    }
+
 def gemini_research(query: str) -> dict:
-    """Direct Gemini API call for research"""
+    """Perform research using Gemini AI if available, fallback otherwise."""
     if not HAS_GEMINI:
         return fallback_research(query)
     
@@ -618,47 +826,53 @@ def gemini_research(query: str) -> dict:
         genai.configure(api_key=GEMINI_KEY)
         
         model = genai.GenerativeModel('gemini-1.5-flash')
-        
         prompt = f"""
         You are a research assistant. Research the topic: "{query}"
-        
-        Provide a comprehensive response with:
+
+        Provide a comprehensive, well-structured analysis with:
         1. A detailed summary of the topic
         2. Key findings and insights
         3. Relevant sources and references
-        
-        Format your response as a research analysis.
+
+        Format response as:
+        - Introduction
+        - Key Points (bulleted)
+        - Conclusion
+        - List of Sources
         """
-        
+
         response = model.generate_content(prompt)
-        
-        return {
-            "topic": query,
-            "summary": response.text,
-            "sources": "Generated using Gemini AI with access to trained knowledge base",
-            "tool_used": ["gemini-ai", "knowledge-base"],
-            "timestamp": datetime.now().isoformat(),
-            "id": f"research_{datetime.now().timestamp()}",
-            "mode": "real_ai"
-        }
-        
+
+        return format_research_response(
+            topic=query,
+            summary=response.text,
+            sources="Generated using Gemini AI with access to trained knowledge base",
+            tool_used=["gemini-ai", "knowledge-base"],
+            mode="real_ai"
+        )
     except Exception as e:
         print(f"Gemini research error: {e}")
         return fallback_research(query)
 
 def fallback_research(query: str) -> dict:
-    """Fallback research"""
-    return {
-        "topic": query,
-        "summary": f"Unable to perform real AI research for '{query}'. Please check API configuration.",
-        "sources": "Fallback mode - no real sources available",
-        "tool_used": ["fallback"],
-        "timestamp": datetime.now().isoformat(),
-        "id": f"research_{datetime.now().timestamp()}",
-        "mode": "fallback"
-    }
+    """Fallback research when Gemini API is unavailable."""
+    return format_research_response(
+        topic=query,
+        summary=f"Unable to perform real AI research for '{query}'. Please check API configuration.",
+        sources="No real sources available (Fallback Mode)",
+        tool_used=["fallback"],
+        mode="fallback"
+    )
 
-app = FastAPI(title="Academic Research Agent API", version="1.0.0")
+# ========================
+# FastAPI App Setup
+# ========================
+
+app = FastAPI(
+    title="Academic Research Agent API",
+    description="AI-powered research and grading assistant",
+    version="1.0.0"
+)
 
 app.add_middleware(
     CORSMiddleware,
@@ -667,6 +881,10 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+# ========================
+# Pydantic Models
+# ========================
 
 class ResearchRequest(BaseModel):
     query: str
@@ -677,8 +895,15 @@ class GradingRequest(BaseModel):
     language: str = "python"
     assignment_id: Optional[str] = None
 
+# ========================
+# Endpoints
+# ========================
+
 @app.post("/api/research")
 async def research_endpoint(request: ResearchRequest):
+    """
+    Perform AI-powered research and return a structured, formatted response.
+    """
     try:
         result = gemini_research(request.query)
         print(f"Research completed for: {request.query} (Mode: {result.get('mode')})")
@@ -689,14 +914,16 @@ async def research_endpoint(request: ResearchRequest):
 
 @app.post("/api/grading/analyze")
 async def analyze_code(request: GradingRequest):
+    """
+    Analyze and grade code with basic static analysis.
+    """
     try:
         import ast
-        
         score = 100
         feedback = []
         suggestions = []
         strengths = []
-        
+
         if request.language.lower() == "python":
             try:
                 tree = ast.parse(request.code)
@@ -706,31 +933,23 @@ async def analyze_code(request: GradingRequest):
                 has_try_except = any(isinstance(node, ast.Try) for node in ast.walk(tree))
                 
                 if has_functions:
-                    strengths.append("Good use of functions for code organization")
+                    strengths.append("✅ Good use of functions for code organization")
                 else:
-                    feedback.append({
-                        "type": "warning",
-                        "message": "Consider breaking code into functions for better organization",
-                        "line": None
-                    })
+                    feedback.append({"type": "warning", "message": "Consider breaking code into functions", "line": None})
                     score -= 10
                 
                 if has_classes:
-                    strengths.append("Object-oriented programming implementation")
+                    strengths.append("✅ Object-oriented programming implementation")
                 
                 if not has_try_except and len(request.code.split('\n')) > 10:
                     suggestions.append("Add error handling with try-except blocks")
                     score -= 5
                 
                 if not strengths:
-                    strengths.append("Code compiles successfully")
+                    strengths.append("✅ Code compiles successfully")
                     
             except SyntaxError as e:
-                feedback.append({
-                    "type": "error", 
-                    "message": f"Syntax error: {e.msg}",
-                    "line": e.lineno
-                })
+                feedback.append({"type": "error", "message": f"Syntax error: {e.msg}", "line": e.lineno})
                 score -= 30
         
         return {
@@ -774,5 +993,8 @@ async def get_research_history():
 async def get_grading_history():
     return {"history": []}
 
+# ========================
+# Entry Point
+# ========================
 if __name__ == "__main__":
     uvicorn.run(app, host="0.0.0.0", port=PORT, reload=False)
