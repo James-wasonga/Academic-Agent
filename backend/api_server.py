@@ -887,9 +887,6 @@ def fallback_research(query: str) -> dict:
         "mode": "fallback"
     }
 
-# ===========================================
-# FastAPI App Setup
-# ===========================================
 
 app = FastAPI(title="Academic Research Agent API", version="1.0.0")
 
