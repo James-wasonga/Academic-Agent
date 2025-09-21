@@ -603,16 +603,60 @@ load_dotenv()
 
 PORT = int(os.environ.get("PORT", 8000))
 ANTHROPIC_KEY = os.getenv("ANTHROPIC_API_KEY")
+GEMINI_KEY = os.getenv("GEMINI_API_KEY")
+
 HAS_ANTHROPIC = bool(ANTHROPIC_KEY and ANTHROPIC_KEY.startswith("sk-ant"))
+HAS_GEMINI = bool(GEMINI_KEY and len(GEMINI_KEY) > 20)
 
 print(f"Port: {PORT}")
 print(f"Anthropic Key: {'Available' if HAS_ANTHROPIC else 'Missing'}")
+print(f"Gemini Key: {'Available' if HAS_GEMINI else 'Missing'}")
+
+# Try to load the real research agent
+REAL_AGENT_AVAILABLE = False
+try:
+    if HAS_ANTHROPIC:
+        from langchain_anthropic import ChatAnthropic
+        from langchain_core.prompts import ChatPromptTemplate
+        from langchain_core.output_parsers import PydanticOutputParser
+        from langchain.agents import create_tool_calling_agent, AgentExecutor
+        
+        # Import your tools
+        from tools import search_tool, wiki_tool, save_tool
+        from main import ResearchResponse
+        
+        # Initialize the real agent
+        llm = ChatAnthropic(model="claude-3-5-sonnet-20241022")
+        parser = PydanticOutputParser(pydantic_object=ResearchResponse)
+        
+        prompt = ChatPromptTemplate.from_messages([
+            ("system", """
+            You are a research assistant that will help generate a research paper
+            Answer the user query and use the necessary tools.
+            Wrap the output in this format and provide no other text\n{format_instructions}
+            """),
+            ("placeholder", "{chat_hostory}"),
+            ("human", "{query}"),
+            ("placeholder", "{agent_scratchpad}"),
+        ]).partial(format_instructions=parser.get_format_instructions())
+        
+        tools = [search_tool, wiki_tool, save_tool]
+        agent = create_tool_calling_agent(llm=llm, prompt=prompt, tools=tools)
+        agent_executor = AgentExecutor(agent=agent, tools=tools, verbose=True)
+        
+        REAL_AGENT_AVAILABLE = True
+        print("✅ Real research agent loaded successfully")
+        
+except Exception as e:
+    print(f"⚠️ Real agent failed to load: {e}")
+    print("🔄 Will use fallback research mode")
+    REAL_AGENT_AVAILABLE = False
 
 app = FastAPI(title="Academic Research Agent API", version="1.0.0")
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # Temporarily allow all for testing
+    allow_origins=["*"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -627,27 +671,66 @@ class GradingRequest(BaseModel):
     language: str = "python"
     assignment_id: Optional[str] = None
 
-# Simple research function that works
-def simple_research(query: str) -> dict:
+def fallback_research(query: str) -> dict:
+    """Enhanced fallback with some real data"""
     return {
         "topic": query,
-        "summary": f"Research analysis for '{query}'. This system provides comprehensive research results when fully configured with API keys. Currently running in demonstration mode with sample data.",
-        "sources": "Sample sources: Academic papers, research databases, and expert analysis would be included here.",
+        "summary": f"Research analysis for '{query}'. This system is currently running in fallback mode. For full AI-powered research capabilities, ensure all API keys are properly configured. The system would normally provide comprehensive analysis using advanced language models, web search, and knowledge bases.",
+        "sources": f"Fallback sources for '{query}': Academic databases, research papers, and expert analysis would be consulted when fully configured.",
         "tool_used": ["search", "wiki"],
         "timestamp": datetime.now().isoformat(),
-        "id": f"research_{datetime.now().timestamp()}"
+        "id": f"research_{datetime.now().timestamp()}",
+        "mode": "fallback"
     }
+
+def real_research(query: str, tools: List[str]) -> dict:
+    """Use the real research agent"""
+    try:
+        print(f"🔍 Using real agent for: {query}")
+        
+        raw_response = agent_executor.invoke({
+            "query": query,
+            "chat_hostory": []
+        })
+        
+        if "output" in raw_response and raw_response["output"]:
+            try:
+                structured_response = parser.parse(str(raw_response["output"]))
+                return {
+                    "topic": structured_response.topic,
+                    "summary": structured_response.summary,
+                    "sources": structured_response.sources,
+                    "tool_used": structured_response.tool_used,
+                    "timestamp": datetime.now().isoformat(),
+                    "id": f"research_{datetime.now().timestamp()}",
+                    "mode": "real_ai"
+                }
+            except Exception as parse_error:
+                print(f"Parse error: {parse_error}")
+                return fallback_research(query)
+        else:
+            return fallback_research(query)
+            
+    except Exception as e:
+        print(f"Real research error: {e}")
+        return fallback_research(query)
 
 @app.post("/api/research")
 async def research_endpoint(request: ResearchRequest):
     try:
-        result = simple_research(request.query)
-        print(f"Research request: {request.query}")
+        if REAL_AGENT_AVAILABLE:
+            result = real_research(request.query, request.tools)
+        else:
+            result = fallback_research(request.query)
+        
+        print(f"Research completed for: {request.query} (Mode: {result.get('mode', 'unknown')})")
         return result
+        
     except Exception as e:
-        print(f"Research error: {e}")
-        return simple_research(request.query)
+        print(f"Research endpoint error: {e}")
+        return fallback_research(request.query)
 
+# Keep the same grading and other endpoints from your working version
 @app.post("/api/grading/analyze")
 async def analyze_code(request: GradingRequest):
     try:
@@ -660,35 +743,61 @@ async def analyze_code(request: GradingRequest):
         
         if request.language.lower() == "python":
             try:
-                ast.parse(request.code)
-                strengths.append("Code compiles successfully")
+                tree = ast.parse(request.code)
                 
-                if "def " in request.code:
-                    strengths.append("Good use of functions")
+                # Enhanced analysis
+                has_functions = any(isinstance(node, ast.FunctionDef) for node in ast.walk(tree))
+                has_classes = any(isinstance(node, ast.ClassDef) for node in ast.walk(tree))
+                has_try_except = any(isinstance(node, ast.Try) for node in ast.walk(tree))
+                
+                if has_functions:
+                    strengths.append("Good use of functions for code organization")
                 else:
-                    suggestions.append("Consider using functions for better organization")
+                    feedback.append({
+                        "type": "warning",
+                        "message": "Consider breaking code into functions for better organization",
+                        "line": None
+                    })
                     score -= 10
-                    
-                if "try:" not in request.code and len(request.code.split('\n')) > 10:
+                
+                if has_classes:
+                    strengths.append("Object-oriented programming implementation")
+                
+                if not has_try_except and len(request.code.split('\n')) > 10:
                     suggestions.append("Add error handling with try-except blocks")
                     score -= 5
+                
+                # Check variable naming
+                variable_names = [node.id for node in ast.walk(tree) 
+                                if isinstance(node, ast.Name) and isinstance(node.ctx, ast.Store)]
+                single_letter_vars = [var for var in variable_names 
+                                    if len(var) == 1 and var not in ['i', 'j', 'x', 'y']]
+                
+                if single_letter_vars:
+                    suggestions.append("Use more descriptive variable names")
+                    score -= 5
+                
+                if not strengths:
+                    strengths.append("Code compiles successfully")
                     
             except SyntaxError as e:
                 feedback.append({
-                    "type": "error",
+                    "type": "error", 
                     "message": f"Syntax error: {e.msg}",
                     "line": e.lineno
                 })
                 score -= 30
+                suggestions.append("Fix syntax errors before submission")
         
         return {
             "score": max(0, score),
             "feedback": feedback,
             "suggestions": suggestions,
-            "strengths": strengths or ["Code structure is acceptable"],
+            "strengths": strengths,
             "timestamp": datetime.now().isoformat(),
             "language": request.language
         }
+        
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
@@ -696,9 +805,14 @@ async def analyze_code(request: GradingRequest):
 async def health_check():
     return {
         "status": "healthy",
-        "service": "Academic Research Agent API",
+        "service": "Academic Research Agent API", 
         "port": PORT,
-        "api_keys": {"anthropic": HAS_ANTHROPIC},
+        "api_keys": {
+            "anthropic": HAS_ANTHROPIC,
+            "gemini": HAS_GEMINI
+        },
+        "real_agent": REAL_AGENT_AVAILABLE,
+        "mode": "real_ai" if REAL_AGENT_AVAILABLE else "fallback",
         "message": "API is running"
     }
 
@@ -706,7 +820,8 @@ async def health_check():
 async def root():
     return {
         "message": "Academic Research Agent API",
-        "status": "running",
+        "status": "running", 
+        "mode": "real_ai" if REAL_AGENT_AVAILABLE else "fallback",
         "docs": "/docs"
     }
 
@@ -714,7 +829,7 @@ async def root():
 async def get_research_history():
     return {"history": []}
 
-@app.get("/api/grading/history")
+@app.get("/api/grading/history") 
 async def get_grading_history():
     return {"history": []}
 
