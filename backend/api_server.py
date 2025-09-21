@@ -613,23 +613,69 @@ print(f"Anthropic Key: {'Available' if HAS_ANTHROPIC else 'Missing'}")
 print(f"Gemini Key: {'Available' if HAS_GEMINI else 'Missing'}")
 
 # Try to load the real research agent
+# REAL_AGENT_AVAILABLE = False
+# try:
+#     if HAS_GEMINI:
+#         # from langchain_anthropic import ChatAnthropic
+#         from langchain_google_genai import ChatGoogleGenerativeAI
+#         from langchain_core.prompts import ChatPromptTemplate
+#         from langchain_core.output_parsers import PydanticOutputParser
+#         from langchain.agents import create_tool_calling_agent, AgentExecutor
+        
+#         # Import your tools
+#         from tools import search_tool, wiki_tool, save_tool
+#         from main import ResearchResponse
+        
+#         # Initialize the real agent
+#         # llm = ChatAnthropic(model="claude-3-5-sonnet-20241022")
+#         llm = ChatGoogleGenerativeAI(
+#             model="gemini-1.5-flash", 
+#             google_api_key=GEMINI_KEY,
+#             temperature=0.2
+#         )
+#         parser = PydanticOutputParser(pydantic_object=ResearchResponse)
+        
+#         prompt = ChatPromptTemplate.from_messages([
+#             ("system", """
+#             You are a research assistant that will help generate a research paper
+#             Answer the user query and use the necessary tools.
+#             Wrap the output in this format and provide no other text\n{format_instructions}
+#             """),
+#             ("placeholder", "{chat_hostory}"),
+#             ("human", "{query}"),
+#             ("placeholder", "{agent_scratchpad}"),
+#         ]).partial(format_instructions=parser.get_format_instructions())
+        
+#         tools = [search_tool, wiki_tool, save_tool]
+#         agent = create_tool_calling_agent(llm=llm, prompt=prompt, tools=tools)
+#         agent_executor = AgentExecutor(agent=agent, tools=tools, verbose=True)
+        
+#         REAL_AGENT_AVAILABLE = True
+#         print("✅ Real research agent loaded successfully")
+        
+# except Exception as e:
+#     print(f"⚠️ Real agent failed to load: {e}")
+#     print("🔄 Will use fallback research mode")
+#     REAL_AGENT_AVAILABLE = False
+
+# Try to load the real research agent
 REAL_AGENT_AVAILABLE = False
 try:
     if HAS_GEMINI:
-        # from langchain_anthropic import ChatAnthropic
+        print("🔄 Attempting to load research agent components...")
+        
         from langchain_google_genai import ChatGoogleGenerativeAI
         from langchain_core.prompts import ChatPromptTemplate
-        from langchain_core.output_parsers import PydanticOutputParser
+        from langchain.output_parsers import PydanticOutputParser  # Changed this line
         from langchain.agents import create_tool_calling_agent, AgentExecutor
         
-        # Import your tools
+        # Import your tools and models
         from tools import search_tool, wiki_tool, save_tool
         from main import ResearchResponse
         
-        # Initialize the real agent
-        # llm = ChatAnthropic(model="claude-3-5-sonnet-20241022")
+        # Initialize the real agent with Gemini
         llm = ChatGoogleGenerativeAI(
-            model="gemini-1.5-flash",
+            model="gemini-1.5-flash", 
             google_api_key=GEMINI_KEY,
             temperature=0.2
         )
@@ -651,10 +697,11 @@ try:
         agent_executor = AgentExecutor(agent=agent, tools=tools, verbose=True)
         
         REAL_AGENT_AVAILABLE = True
-        print("✅ Real research agent loaded successfully")
+        print("✅ Real research agent loaded successfully with Gemini")
         
 except Exception as e:
     print(f"⚠️ Real agent failed to load: {e}")
+    print(f"⚠️ Error type: {type(e).__name__}")
     print("🔄 Will use fallback research mode")
     REAL_AGENT_AVAILABLE = False
 
