@@ -597,113 +597,66 @@ import uvicorn
 from datetime import datetime
 import os
 from dotenv import load_dotenv
-import requests
 
 load_dotenv()
 
 PORT = int(os.environ.get("PORT", 8000))
-ANTHROPIC_KEY = os.getenv("ANTHROPIC_API_KEY")
 GEMINI_KEY = os.getenv("GEMINI_API_KEY")
-
-HAS_ANTHROPIC = bool(ANTHROPIC_KEY and ANTHROPIC_KEY.startswith("sk-ant"))
 HAS_GEMINI = bool(GEMINI_KEY and len(GEMINI_KEY) > 20)
 
 print(f"Port: {PORT}")
-print(f"Anthropic Key: {'Available' if HAS_ANTHROPIC else 'Missing'}")
 print(f"Gemini Key: {'Available' if HAS_GEMINI else 'Missing'}")
 
-# Try to load the real research agent
-# REAL_AGENT_AVAILABLE = False
-# try:
-#     if HAS_GEMINI:
-#         # from langchain_anthropic import ChatAnthropic
-#         from langchain_google_genai import ChatGoogleGenerativeAI
-#         from langchain_core.prompts import ChatPromptTemplate
-#         from langchain_core.output_parsers import PydanticOutputParser
-#         from langchain.agents import create_tool_calling_agent, AgentExecutor
+# Simple research function using Gemini directly
+def gemini_research(query: str) -> dict:
+    """Direct Gemini API call for research"""
+    if not HAS_GEMINI:
+        return fallback_research(query)
+    
+    try:
+        import google.generativeai as genai
+        genai.configure(api_key=GEMINI_KEY)
         
-#         # Import your tools
-#         from tools import search_tool, wiki_tool, save_tool
-#         from main import ResearchResponse
+        model = genai.GenerativeModel('gemini-1.5-flash')
         
-#         # Initialize the real agent
-#         # llm = ChatAnthropic(model="claude-3-5-sonnet-20241022")
-#         llm = ChatGoogleGenerativeAI(
-#             model="gemini-1.5-flash", 
-#             google_api_key=GEMINI_KEY,
-#             temperature=0.2
-#         )
-#         parser = PydanticOutputParser(pydantic_object=ResearchResponse)
+        prompt = f"""
+        You are a research assistant. Research the topic: "{query}"
         
-#         prompt = ChatPromptTemplate.from_messages([
-#             ("system", """
-#             You are a research assistant that will help generate a research paper
-#             Answer the user query and use the necessary tools.
-#             Wrap the output in this format and provide no other text\n{format_instructions}
-#             """),
-#             ("placeholder", "{chat_hostory}"),
-#             ("human", "{query}"),
-#             ("placeholder", "{agent_scratchpad}"),
-#         ]).partial(format_instructions=parser.get_format_instructions())
+        Provide a comprehensive response with:
+        1. A detailed summary of the topic
+        2. Key findings and insights
+        3. Relevant sources and references
         
-#         tools = [search_tool, wiki_tool, save_tool]
-#         agent = create_tool_calling_agent(llm=llm, prompt=prompt, tools=tools)
-#         agent_executor = AgentExecutor(agent=agent, tools=tools, verbose=True)
+        Format your response as a research analysis.
+        """
         
-#         REAL_AGENT_AVAILABLE = True
-#         print("✅ Real research agent loaded successfully")
+        response = model.generate_content(prompt)
         
-# except Exception as e:
-#     print(f"⚠️ Real agent failed to load: {e}")
-#     print("🔄 Will use fallback research mode")
-#     REAL_AGENT_AVAILABLE = False
+        return {
+            "topic": query,
+            "summary": response.text,
+            "sources": "Generated using Gemini AI with access to trained knowledge base",
+            "tool_used": ["gemini-ai", "knowledge-base"],
+            "timestamp": datetime.now().isoformat(),
+            "id": f"research_{datetime.now().timestamp()}",
+            "mode": "real_ai"
+        }
+        
+    except Exception as e:
+        print(f"Gemini research error: {e}")
+        return fallback_research(query)
 
-# Try to load the real research agent
-REAL_AGENT_AVAILABLE = False
-try:
-    if HAS_GEMINI:
-        print("🔄 Attempting to load research agent components...")
-        
-        from langchain_google_genai import ChatGoogleGenerativeAI
-        from langchain_core.prompts import ChatPromptTemplate
-        from langchain.output_parsers import PydanticOutputParser  # Changed this line
-        from langchain.agents import create_tool_calling_agent, AgentExecutor
-        
-        # Import your tools and models
-        from tools import search_tool, wiki_tool, save_tool
-        from main import ResearchResponse
-        
-        # Initialize the real agent with Gemini
-        llm = ChatGoogleGenerativeAI(
-            model="gemini-1.5-flash", 
-            google_api_key=GEMINI_KEY,
-            temperature=0.2
-        )
-        parser = PydanticOutputParser(pydantic_object=ResearchResponse)
-        
-        prompt = ChatPromptTemplate.from_messages([
-            ("system", """
-            You are a research assistant that will help generate a research paper
-            Answer the user query and use the necessary tools.
-            Wrap the output in this format and provide no other text\n{format_instructions}
-            """),
-            ("placeholder", "{chat_hostory}"),
-            ("human", "{query}"),
-            ("placeholder", "{agent_scratchpad}"),
-        ]).partial(format_instructions=parser.get_format_instructions())
-        
-        tools = [search_tool, wiki_tool, save_tool]
-        agent = create_tool_calling_agent(llm=llm, prompt=prompt, tools=tools)
-        agent_executor = AgentExecutor(agent=agent, tools=tools, verbose=True)
-        
-        REAL_AGENT_AVAILABLE = True
-        print("✅ Real research agent loaded successfully with Gemini")
-        
-except Exception as e:
-    print(f"⚠️ Real agent failed to load: {e}")
-    print(f"⚠️ Error type: {type(e).__name__}")
-    print("🔄 Will use fallback research mode")
-    REAL_AGENT_AVAILABLE = False
+def fallback_research(query: str) -> dict:
+    """Fallback research"""
+    return {
+        "topic": query,
+        "summary": f"Unable to perform real AI research for '{query}'. Please check API configuration.",
+        "sources": "Fallback mode - no real sources available",
+        "tool_used": ["fallback"],
+        "timestamp": datetime.now().isoformat(),
+        "id": f"research_{datetime.now().timestamp()}",
+        "mode": "fallback"
+    }
 
 app = FastAPI(title="Academic Research Agent API", version="1.0.0")
 
@@ -724,66 +677,16 @@ class GradingRequest(BaseModel):
     language: str = "python"
     assignment_id: Optional[str] = None
 
-def fallback_research(query: str) -> dict:
-    """Enhanced fallback with some real data"""
-    return {
-        "topic": query,
-        "summary": f"Research analysis for '{query}'. This system is currently running in fallback mode. For full AI-powered research capabilities, ensure all API keys are properly configured. The system would normally provide comprehensive analysis using advanced language models, web search, and knowledge bases.",
-        "sources": f"Fallback sources for '{query}': Academic databases, research papers, and expert analysis would be consulted when fully configured.",
-        "tool_used": ["search", "wiki"],
-        "timestamp": datetime.now().isoformat(),
-        "id": f"research_{datetime.now().timestamp()}",
-        "mode": "fallback"
-    }
-
-def real_research(query: str, tools: List[str]) -> dict:
-    """Use the real research agent"""
-    try:
-        print(f"🔍 Using real agent for: {query}")
-        
-        raw_response = agent_executor.invoke({
-            "query": query,
-            "chat_hostory": []
-        })
-        
-        if "output" in raw_response and raw_response["output"]:
-            try:
-                structured_response = parser.parse(str(raw_response["output"]))
-                return {
-                    "topic": structured_response.topic,
-                    "summary": structured_response.summary,
-                    "sources": structured_response.sources,
-                    "tool_used": structured_response.tool_used,
-                    "timestamp": datetime.now().isoformat(),
-                    "id": f"research_{datetime.now().timestamp()}",
-                    "mode": "real_ai"
-                }
-            except Exception as parse_error:
-                print(f"Parse error: {parse_error}")
-                return fallback_research(query)
-        else:
-            return fallback_research(query)
-            
-    except Exception as e:
-        print(f"Real research error: {e}")
-        return fallback_research(query)
-
 @app.post("/api/research")
 async def research_endpoint(request: ResearchRequest):
     try:
-        if REAL_AGENT_AVAILABLE:
-            result = real_research(request.query, request.tools)
-        else:
-            result = fallback_research(request.query)
-        
-        print(f"Research completed for: {request.query} (Mode: {result.get('mode', 'unknown')})")
+        result = gemini_research(request.query)
+        print(f"Research completed for: {request.query} (Mode: {result.get('mode')})")
         return result
-        
     except Exception as e:
         print(f"Research endpoint error: {e}")
         return fallback_research(request.query)
 
-# Keep the same grading and other endpoints from your working version
 @app.post("/api/grading/analyze")
 async def analyze_code(request: GradingRequest):
     try:
@@ -798,7 +701,6 @@ async def analyze_code(request: GradingRequest):
             try:
                 tree = ast.parse(request.code)
                 
-                # Enhanced analysis
                 has_functions = any(isinstance(node, ast.FunctionDef) for node in ast.walk(tree))
                 has_classes = any(isinstance(node, ast.ClassDef) for node in ast.walk(tree))
                 has_try_except = any(isinstance(node, ast.Try) for node in ast.walk(tree))
@@ -820,16 +722,6 @@ async def analyze_code(request: GradingRequest):
                     suggestions.append("Add error handling with try-except blocks")
                     score -= 5
                 
-                # Check variable naming
-                variable_names = [node.id for node in ast.walk(tree) 
-                                if isinstance(node, ast.Name) and isinstance(node.ctx, ast.Store)]
-                single_letter_vars = [var for var in variable_names 
-                                    if len(var) == 1 and var not in ['i', 'j', 'x', 'y']]
-                
-                if single_letter_vars:
-                    suggestions.append("Use more descriptive variable names")
-                    score -= 5
-                
                 if not strengths:
                     strengths.append("Code compiles successfully")
                     
@@ -840,7 +732,6 @@ async def analyze_code(request: GradingRequest):
                     "line": e.lineno
                 })
                 score -= 30
-                suggestions.append("Fix syntax errors before submission")
         
         return {
             "score": max(0, score),
@@ -860,12 +751,9 @@ async def health_check():
         "status": "healthy",
         "service": "Academic Research Agent API", 
         "port": PORT,
-        "api_keys": {
-            "anthropic": HAS_ANTHROPIC,
-            "gemini": HAS_GEMINI
-        },
-        "real_agent": REAL_AGENT_AVAILABLE,
-        "mode": "real_ai" if REAL_AGENT_AVAILABLE else "fallback",
+        "api_keys": {"gemini": HAS_GEMINI},
+        "real_ai": HAS_GEMINI,
+        "mode": "real_ai" if HAS_GEMINI else "fallback",
         "message": "API is running"
     }
 
@@ -874,7 +762,7 @@ async def root():
     return {
         "message": "Academic Research Agent API",
         "status": "running", 
-        "mode": "real_ai" if REAL_AGENT_AVAILABLE else "fallback",
+        "mode": "real_ai" if HAS_GEMINI else "fallback",
         "docs": "/docs"
     }
 
