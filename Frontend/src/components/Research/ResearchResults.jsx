@@ -305,7 +305,7 @@ const ResearchResults = ({ results }) => {
   </div>
 
   {/* Copyright */}
-  <div className="mt-2 text-center text-gray-400 text-[10px]">
+  <div className="mt-2 text-center text-blue-600 text-[10px] font-medium">
     © {new Date().getFullYear()} AcademicAgent. All rights reserved.
   </div>
     </div>
