@@ -107,9 +107,25 @@ import remarkGfm from "remark-gfm";
 const cleanMarkdown = (text) => {
   if (!text) return "";
   return text
+    // Remove bullets in front of numbered lines like "1. Something"
+    .replace(/[-*]\s*(\d+\.\s)/g, "$1")
+    // Keep bold formatting but clean unnecessary asterisks
     .replace(/\*\*/g, "**")
-    .replace(/\* /g, "- ")
+    // Convert unnumbered * items to normal dash lists
+    .replace(/^\*\s+/gm, "- ")
+    // Remove single * that might remain
     .replace(/\*/g, "");
+};
+
+// Custom component to bold numbered headings like "1. EXECUTIVE SUMMARY:"
+const NumberedHeading = ({ children }) => {
+  const text = children?.[0] || "";
+  const isNumberedHeading = /^\d+(\.\d+)*\.\s+/.test(text);
+  return (
+    <p className={`mb-4 leading-relaxed ${isNumberedHeading ? "font-bold" : ""}`}>
+      {children}
+    </p>
+  );
 };
 
 const ResearchResults = ({ results }) => {
@@ -141,9 +157,23 @@ const ResearchResults = ({ results }) => {
         </h4>
       </div>
 
-      {/* Markdown with forced styles */}
+      {/* Markdown with forced list styles */}
       <div className="markdown-content prose prose-lg max-w-none prose-headings:font-bold prose-p:leading-relaxed">
-        <ReactMarkdown remarkPlugins={[remarkGfm]}>
+        <ReactMarkdown
+          remarkPlugins={[remarkGfm]}
+          components={{
+            p: NumberedHeading,
+            ul: ({ node, ...props }) => (
+              <ul className="list-disc list-inside ml-5 mb-4 space-y-2" {...props} />
+            ),
+            ol: ({ node, ...props }) => (
+              <ol className="list-decimal list-inside ml-5 mb-4 space-y-2" {...props} />
+            ),
+            li: ({ node, ...props }) => (
+              <li className="leading-relaxed text-gray-800" {...props} />
+            ),
+          }}
+        >
           {cleanedSummary}
         </ReactMarkdown>
       </div>
@@ -173,3 +203,4 @@ const ResearchResults = ({ results }) => {
 };
 
 export default ResearchResults;
+
