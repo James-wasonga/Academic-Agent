@@ -15,7 +15,7 @@ const Dashboard = () => {
   return (
     <div className="mb-8">
       <div className="flex justify-between items-center mb-6">
-        <h2 className="text-2xl font-bold text-gray-900">Dashboard Overview</h2>
+        <h2 className="text-2xl font-bold text-gray-900">Dashboard Over</h2>
         <button
           onClick={handleResetStats}
           className="flex items-center space-x-2 px-3 py-2 text-sm text-gray-600 hover:text-gray-900 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
