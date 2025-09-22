@@ -142,8 +142,36 @@ const ResearchResults = ({ results }) => {
       </div>
 
       {/* Render Cleaned Markdown */}
-      <div className="prose prose-lg max-w-none prose-headings:font-bold prose-headings:text-gray-900 prose-p:leading-relaxed prose-li:leading-relaxed prose-li:ml-5 prose-ul:list-disc prose-ol:list-decimal prose-strong:text-indigo-700 prose-headings:mt-6 prose-headings:mb-3">
-        <ReactMarkdown remarkPlugins={[remarkGfm]}>
+      <div className="max-w-none">
+        <ReactMarkdown
+          remarkPlugins={[remarkGfm]}
+          components={{
+            h1: ({ node, ...props }) => (
+              <h1 className="text-2xl font-bold mt-6 mb-3 border-b pb-1" {...props} />
+            ),
+            h2: ({ node, ...props }) => (
+              <h2 className="text-xl font-semibold mt-5 mb-2" {...props} />
+            ),
+            h3: ({ node, ...props }) => (
+              <h3 className="text-lg font-medium mt-4 mb-2" {...props} />
+            ),
+            p: ({ node, ...props }) => (
+              <p className="mb-4 leading-relaxed text-gray-700" {...props} />
+            ),
+            ul: ({ node, ...props }) => (
+              <ul className="list-disc list-inside space-y-2 ml-5 mb-4" {...props} />
+            ),
+            ol: ({ node, ...props }) => (
+              <ol className="list-decimal list-inside space-y-2 ml-5 mb-4" {...props} />
+            ),
+            li: ({ node, ...props }) => (
+              <li className="leading-relaxed text-gray-800" {...props} />
+            ),
+            strong: ({ node, ...props }) => (
+              <strong className="text-indigo-700 font-semibold" {...props} />
+            ),
+          }}
+        >
           {cleanedSummary}
         </ReactMarkdown>
       </div>
@@ -151,8 +179,10 @@ const ResearchResults = ({ results }) => {
       {/* Sources */}
       {results.sources && (
         <div className="bg-gray-50 rounded-xl p-4 border border-gray-200">
-          <h4 className="font-semibold text-gray-800 mb-2">📚 Sour</h4>
-          <p className="text-gray-700 text-sm leading-relaxed">{results.sources}</p>
+          <h4 className="font-semibold text-gray-800 mb-2">📚 Sources</h4>
+          <p className="text-gray-700 text-sm leading-relaxed">
+            {results.sources}
+          </p>
         </div>
       )}
 
