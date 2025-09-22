@@ -108,12 +108,14 @@ import jsPDF from "jspdf";
 const cleanMarkdown = (text) => {
   if (!text) return "";
   return text
+    .replace(/^#{1,6}\s*/gm, "") // remove all # headings
     .replace(/[-*]\s*(\d+\.\s)/g, "$1") // Remove bullets before numbered lines
     .replace(/^\*\s+/gm, "- ") // Convert * to dash lists
-    .replace(/\*/g, ""); // Remove any remaining stray *
+    .replace(/\*\*/g, "") // remove bold markers
+    .replace(/\*/g, ""); // Remove stray *
 };
 
-// Component to bold numbered headings
+// Component to bold numbered headings on-screen
 const NumberedHeading = ({ children }) => {
   const text = children?.[0] || "";
   const isNumberedHeading = /^\d+(\.\d+)*\.\s+/.test(text);
@@ -129,7 +131,6 @@ const ResearchResults = ({ results }) => {
 
   const cleanedSummary = cleanMarkdown(results.summary);
 
-  // ✅ Proper PDF Export
   const handleExport = () => {
     const doc = new jsPDF({ unit: "pt", format: "a4" });
     let y = 40;
@@ -146,13 +147,13 @@ const ResearchResults = ({ results }) => {
     doc.text(`Topic: ${results.topic}`, 40, y);
     y += 25;
 
-    // Summary with formatting
+    // Content
     const lines = cleanedSummary.split("\n");
     doc.setFontSize(12);
 
     lines.forEach((line) => {
       if (!line.trim()) {
-        y += 10; // Add spacing for blank lines
+        y += 8; // spacing for blank lines
         return;
       }
 
@@ -163,13 +164,17 @@ const ResearchResults = ({ results }) => {
         doc.setFont("Helvetica", "normal");
       }
 
-      // Bulleted lists
+      // Bullet points
       if (/^\-\s+/.test(line)) {
         line = "• " + line.replace(/^\-\s+/, "");
       }
 
-      const textLines = doc.splitTextToSize(line, 500);
-      textLines.forEach((t) => {
+      const wrappedLines = doc.splitTextToSize(line, 500);
+      wrappedLines.forEach((t) => {
+        if (y > 770) {
+          doc.addPage();
+          y = 40;
+        }
         doc.text(t, 40, y);
         y += 16;
       });
@@ -178,12 +183,21 @@ const ResearchResults = ({ results }) => {
     // Sources
     if (results.sources) {
       y += 20;
+      if (y > 770) {
+        doc.addPage();
+        y = 40;
+      }
       doc.setFont("Helvetica", "bold");
       doc.text("Sources:", 40, y);
       y += 16;
+
       doc.setFont("Helvetica", "normal");
       const sourceLines = doc.splitTextToSize(results.sources, 500);
       sourceLines.forEach((t) => {
+        if (y > 770) {
+          doc.addPage();
+          y = 40;
+        }
         doc.text(t, 40, y);
         y += 14;
       });
@@ -265,5 +279,3 @@ const ResearchResults = ({ results }) => {
 };
 
 export default ResearchResults;
-
-
