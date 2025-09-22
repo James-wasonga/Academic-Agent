@@ -243,7 +243,7 @@ const ResearchResults = ({ results }) => {
       <div className="flex items-center justify-between border-b border-gray-200 pb-4">
         <h3 className="text-3xl font-bold text-gray-900">Research Results</h3>
         <div className="flex space-x-4">
-          <button className="flex items-center gap-1 px-3 py-1 text-sm text-gray-600 hover:text-gray-900">
+          <button onClick={handleSaveMarkdown} className="flex items-center gap-1 px-3 py-1 text-sm text-gray-600 hover:text-gray-900 transition-colors" title="Save as Markdown">
             <Save className="w-4 h-4" />
             <span>Save</span>
           </button>
