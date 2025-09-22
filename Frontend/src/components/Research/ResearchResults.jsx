@@ -106,26 +106,19 @@ import remarkGfm from "remark-gfm";
 
 const cleanMarkdown = (text) => {
   if (!text) return "";
-  return text
-    // Remove bullets in front of numbered lines like "1. Something"
-    .replace(/[-*]\s*(\d+\.\s)/g, "$1")
-    // Keep bold formatting but clean unnecessary asterisks
-    .replace(/\*\*/g, "**")
-    // Convert unnumbered * items to normal dash lists
-    .replace(/^\*\s+/gm, "- ")
-    // Remove single * that might remain
-    .replace(/\*/g, "");
-};
 
-// Custom component to bold numbered headings like "1. EXECUTIVE SUMMARY:"
-const NumberedHeading = ({ children }) => {
-  const text = children?.[0] || "";
-  const isNumberedHeading = /^\d+(\.\d+)*\.\s+/.test(text);
-  return (
-    <p className={`mb-4 leading-relaxed ${isNumberedHeading ? "font-bold" : ""}`}>
-      {children}
-    </p>
-  );
+  return text
+    // Remove bullets in front of numbered lines like "- 1. Something"
+    .replace(/[-*]\s*(\d+(\.\d+)*\.\s)/g, "$1")
+    // Wrap numbered section titles in ** for bold
+    .replace(
+      /^(\d+(\.\d+)*\.\s+[A-Za-z].+?:)/gm,
+      (_, match) => `**${match}**`
+    )
+    // Keep normal dashes for bullet points
+    .replace(/^\*\s+/gm, "- ")
+    // Remove stray asterisks
+    .replace(/\*/g, "");
 };
 
 const ResearchResults = ({ results }) => {
@@ -157,12 +150,14 @@ const ResearchResults = ({ results }) => {
         </h4>
       </div>
 
-      {/* Markdown with forced list styles */}
+      {/* Markdown */}
       <div className="markdown-content prose prose-lg max-w-none prose-headings:font-bold prose-p:leading-relaxed">
         <ReactMarkdown
           remarkPlugins={[remarkGfm]}
           components={{
-            p: NumberedHeading,
+            p: ({ node, ...props }) => (
+              <p className="mb-4 leading-relaxed text-gray-800" {...props} />
+            ),
             ul: ({ node, ...props }) => (
               <ul className="list-disc list-inside ml-5 mb-4 space-y-2" {...props} />
             ),
@@ -171,6 +166,9 @@ const ResearchResults = ({ results }) => {
             ),
             li: ({ node, ...props }) => (
               <li className="leading-relaxed text-gray-800" {...props} />
+            ),
+            strong: ({ node, ...props }) => (
+              <strong className="font-bold text-gray-900" {...props} />
             ),
           }}
         >
@@ -203,4 +201,3 @@ const ResearchResults = ({ results }) => {
 };
 
 export default ResearchResults;
-
