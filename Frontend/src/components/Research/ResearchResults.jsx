@@ -107,9 +107,9 @@ import remarkGfm from "remark-gfm";
 const cleanMarkdown = (text) => {
   if (!text) return "";
   return text
-    .replace(/\*\*/g, "**") // keep bold but remove redundant ones
-    .replace(/\* /g, "- ") // convert * to list item
-    .replace(/\*/g, ""); // remove leftover asterisks
+    .replace(/\*\*/g, "**")
+    .replace(/\* /g, "- ")
+    .replace(/\*/g, "");
 };
 
 const ResearchResults = ({ results }) => {
@@ -119,65 +119,31 @@ const ResearchResults = ({ results }) => {
 
   return (
     <div className="bg-white rounded-2xl shadow-lg p-8 animate-fadeIn space-y-8">
-      {/* Header Section */}
+      {/* Header */}
       <div className="flex items-center justify-between border-b border-gray-200 pb-4">
         <h3 className="text-3xl font-bold text-gray-900">Research Results</h3>
         <div className="flex space-x-4">
-          <button className="flex items-center gap-1 px-3 py-1 text-sm text-gray-600 hover:text-gray-900 transition-colors">
+          <button className="flex items-center gap-1 px-3 py-1 text-sm text-gray-600 hover:text-gray-900">
             <Save className="w-4 h-4" />
             <span>Save</span>
           </button>
-          <button className="flex items-center gap-1 px-3 py-1 text-sm text-gray-600 hover:text-gray-900 transition-colors">
+          <button className="flex items-center gap-1 px-3 py-1 text-sm text-gray-600 hover:text-gray-900">
             <Download className="w-4 h-4" />
             <span>Export</span>
           </button>
         </div>
       </div>
 
-      {/* Topic Section */}
+      {/* Topic */}
       <div className="bg-gray-50 rounded-xl p-4 border border-gray-200">
         <h4 className="text-xl font-semibold text-gray-800">
           📌 Topic: <span className="font-bold">{results.topic}</span>
         </h4>
       </div>
 
-      {/* Render Cleaned Markdown */}
-      <div className="max-w-none">
-        <ReactMarkdown
-          remarkPlugins={[remarkGfm]}
-          components={{
-            h1: ({ node, ...props }) => (
-              <h1 className="text-2xl font-bold mt-6 mb-3 border-b pb-1" {...props} />
-            ),
-            h2: ({ node, ...props }) => (
-              <h2 className="text-xl font-semibold mt-5 mb-2" {...props} />
-            ),
-            h3: ({ node, ...props }) => (
-              <h3 className="text-lg font-medium mt-4 mb-2" {...props} />
-            ),
-            p: ({ node, ...props }) => (
-              <p className="mb-4 leading-relaxed text-gray-700" {...props} />
-            ),
-            ul: ({ node, ...props }) => (
-              <ul
-                className="list-disc pl-6 space-y-2 mb-4 marker:text-gray-700"
-                {...props}
-              />
-            ),
-            ol: ({ node, ...props }) => (
-              <ol
-                className="list-decimal pl-6 space-y-2 mb-4 marker:text-gray-700"
-                {...props}
-              />
-            ),
-            li: ({ node, ...props }) => (
-              <li className="leading-relaxed text-gray-800" {...props} />
-            ),
-            strong: ({ node, ...props }) => (
-              <strong className="text-indigo-700 font-semibold" {...props} />
-            ),
-          }}
-        >
+      {/* Markdown with forced styles */}
+      <div className="markdown-content prose prose-lg max-w-none prose-headings:font-bold prose-p:leading-relaxed">
+        <ReactMarkdown remarkPlugins={[remarkGfm]}>
           {cleanedSummary}
         </ReactMarkdown>
       </div>
