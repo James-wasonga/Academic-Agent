@@ -159,10 +159,16 @@ const ResearchResults = ({ results }) => {
               <p className="mb-4 leading-relaxed text-gray-700" {...props} />
             ),
             ul: ({ node, ...props }) => (
-              <ul className="list-disc list-inside space-y-2 ml-5 mb-4" {...props} />
+              <ul
+                className="list-disc pl-6 space-y-2 mb-4 marker:text-gray-700"
+                {...props}
+              />
             ),
             ol: ({ node, ...props }) => (
-              <ol className="list-decimal list-inside space-y-2 ml-5 mb-4" {...props} />
+              <ol
+                className="list-decimal pl-6 space-y-2 mb-4 marker:text-gray-700"
+                {...props}
+              />
             ),
             li: ({ node, ...props }) => (
               <li className="leading-relaxed text-gray-800" {...props} />
