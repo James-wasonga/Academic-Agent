@@ -288,7 +288,7 @@ const ResearchResults = ({ results }) => {
       {/* Sources */}
       {results.sources && (
         <div className="bg-gray-50 rounded-xl p-4 border border-gray-200">
-          <h4 className="font-semibold text-gray-800 mb-2">📚 Sources</h4>
+          <h4 className="font-semibold text-gray-800 mb-2">📚 Source</h4>
           <p className="text-gray-700 text-sm leading-relaxed">
             {results.sources}
           </p>
