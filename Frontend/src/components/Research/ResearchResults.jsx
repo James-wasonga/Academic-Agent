@@ -288,7 +288,7 @@ const ResearchResults = ({ results }) => {
       {/* Sources */}
       {results.sources && (
         <div className="bg-gray-50 rounded-xl p-4 border border-gray-200">
-          <h4 className="font-semibold text-gray-800 mb-2">📚 Sourc</h4>
+          <h4 className="font-semibold text-gray-800 mb-2">📚 Sources</h4>
           <p className="text-gray-700 text-sm leading-relaxed">
             {results.sources}
           </p>
@@ -296,13 +296,18 @@ const ResearchResults = ({ results }) => {
       )}
 
       {/* Footer */}
-      <div className="flex items-center justify-between text-xs text-gray-500 border-t pt-3">
-        <span>
-          Tools used: Wikipedia, AI and Other Research Materials by JAMWASO 
-          
-        </span>
-        <span>{new Date(results.timestamp).toLocaleString()}</span>
-      </div>
+      <div className="flex items-center justify-between text-gray-500">
+    <span>
+      Tools used: Wikipedia, AI and Other Research Materials by{" "}
+      <span className="text-blue-600 font-semibold">JAMWASO</span>
+    </span>
+    <span>{new Date(results.timestamp).toLocaleString()}</span>
+  </div>
+
+  {/* Copyright */}
+  <div className="mt-2 text-center text-gray-400 text-[10px]">
+    © {new Date().getFullYear()} AcademicAgent. All rights reserved.
+  </div>
     </div>
   );
 };
