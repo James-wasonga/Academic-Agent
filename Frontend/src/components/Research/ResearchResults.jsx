@@ -206,6 +206,37 @@ const ResearchResults = ({ results }) => {
     doc.save(`${results.topic.replace(/\s+/g, "_")}_Research.pdf`);
   };
 
+    /* ---------------------------
+     Save MD/TXT export
+     --------------------------- */
+     const handleSaveMarkdown = () => {
+      const md = [
+        `# Research Results`,
+        ``,
+        `**Topic:** ${results.topic || ""}`,
+        ``,
+        `**Generated On:** ${results.timestamp || new Date().toLocaleString()}`,
+        ``,
+        `**Tools:** ${Array.isArray(results.tool_used) ? results.tool_used.join(", ") : results.tool_used || ""}`,
+        ``,
+        `## Content:`,
+        "",
+        cleanedSummary,
+        "",
+        `## Sources:`,
+        "",
+        Array.isArray(results.sources) ? results.sources.join("\n") : (results.sources || ""),
+      ].join("\n");
+  
+      const blob = new Blob([md], { type: "text/markdown" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `ResearchResults_${Date.now()}.md`;
+      a.click();
+      URL.revokeObjectURL(url);
+    };
+
   return (
     <div className="bg-white rounded-2xl shadow-lg p-8 animate-fadeIn space-y-8">
       {/* Header */}
