@@ -109,12 +109,11 @@ const cleanMarkdown = (text) => {
   if (!text) return "";
   return text
     .replace(/[-*]\s*(\d+\.\s)/g, "$1") // Remove bullets before numbered lines
-    .replace(/\*\*/g, "") // Remove bold markdown (we'll handle bold in PDF)
     .replace(/^\*\s+/gm, "- ") // Convert * to dash lists
     .replace(/\*/g, ""); // Remove any remaining stray *
 };
 
-// Custom component for bolding numbered headings
+// Component to bold numbered headings
 const NumberedHeading = ({ children }) => {
   const text = children?.[0] || "";
   const isNumberedHeading = /^\d+(\.\d+)*\.\s+/.test(text);
@@ -130,46 +129,63 @@ const ResearchResults = ({ results }) => {
 
   const cleanedSummary = cleanMarkdown(results.summary);
 
-  // ✅ PDF Export Handler
+  // ✅ Proper PDF Export
   const handleExport = () => {
-    const doc = new jsPDF({
-      orientation: "p",
-      unit: "pt",
-      format: "a4",
-    });
+    const doc = new jsPDF({ unit: "pt", format: "a4" });
+    let y = 40;
 
+    // Title
     doc.setFont("Helvetica", "bold");
-    doc.setFontSize(18);
-    doc.text("Research Results", 40, 50);
+    doc.setFontSize(20);
+    doc.text("Research Results", 40, y);
+    y += 30;
 
-    doc.setFont("Helvetica", "normal");
+    // Topic
+    doc.setFont("Helvetica", "bold");
     doc.setFontSize(14);
-    doc.text(`Topic: ${results.topic}`, 40, 80);
+    doc.text(`Topic: ${results.topic}`, 40, y);
+    y += 25;
 
+    // Summary with formatting
+    const lines = cleanedSummary.split("\n");
     doc.setFontSize(12);
-    const textLines = doc.splitTextToSize(cleanedSummary, 500);
-    let y = 110;
 
-    textLines.forEach((line) => {
+    lines.forEach((line) => {
+      if (!line.trim()) {
+        y += 10; // Add spacing for blank lines
+        return;
+      }
+
+      // Bold numbered headings
       if (/^\d+(\.\d+)*\.\s+/.test(line)) {
         doc.setFont("Helvetica", "bold");
       } else {
         doc.setFont("Helvetica", "normal");
       }
-      doc.text(line, 40, y);
-      y += 18; // Add spacing
+
+      // Bulleted lists
+      if (/^\-\s+/.test(line)) {
+        line = "• " + line.replace(/^\-\s+/, "");
+      }
+
+      const textLines = doc.splitTextToSize(line, 500);
+      textLines.forEach((t) => {
+        doc.text(t, 40, y);
+        y += 16;
+      });
     });
 
+    // Sources
     if (results.sources) {
       y += 20;
       doc.setFont("Helvetica", "bold");
       doc.text("Sources:", 40, y);
-      y += 15;
+      y += 16;
       doc.setFont("Helvetica", "normal");
       const sourceLines = doc.splitTextToSize(results.sources, 500);
-      sourceLines.forEach((line) => {
-        doc.text(line, 40, y);
-        y += 15;
+      sourceLines.forEach((t) => {
+        doc.text(t, 40, y);
+        y += 14;
       });
     }
 
