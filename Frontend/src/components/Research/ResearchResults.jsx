@@ -146,7 +146,7 @@ const ResearchResults = ({ results }) => {
       {/* Topic */}
       <div className="bg-gray-50 rounded-xl p-4 border border-gray-200">
         <h4 className="text-xl font-semibold text-gray-800">
-          📌 Topic: <span className="font-bold">{results.topic}</span>
+          Topic: <span className="font-bold">{results.topic}</span>
         </h4>
       </div>
 
