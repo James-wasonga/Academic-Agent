@@ -252,7 +252,7 @@ const ResearchResults = ({ results }) => {
             className="flex items-center gap-1 px-3 py-1 text-sm text-gray-600 hover:text-gray-900"
           >
             <Download className="w-4 h-4" />
-            <span>Export</span>
+            <span>Export PDF</span>
           </button>
         </div>
       </div>
@@ -260,7 +260,7 @@ const ResearchResults = ({ results }) => {
       {/* Topic */}
       <div className="bg-gray-50 rounded-xl p-4 border border-gray-200">
         <h4 className="text-xl font-semibold text-gray-800">
-          📌 Topic: <span className="font-bold">{results.topic}</span>
+           Topic: <span className="font-bold">{results.topic}</span>
         </h4>
       </div>
 
@@ -298,10 +298,8 @@ const ResearchResults = ({ results }) => {
       {/* Footer */}
       <div className="flex items-center justify-between text-xs text-gray-500 border-t pt-3">
         <span>
-          Tools used:{" "}
-          {Array.isArray(results.tool_used)
-            ? results.tool_used.join(", ")
-            : results.tool_used}
+          Tools used: Wikipedia, AI and Other Research Materials by JAMWASO 
+          
         </span>
         <span>{new Date(results.timestamp).toLocaleString()}</span>
       </div>
