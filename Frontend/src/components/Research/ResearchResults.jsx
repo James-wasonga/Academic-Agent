@@ -104,8 +104,18 @@ import { Save, Download } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 
+const cleanMarkdown = (text) => {
+  if (!text) return "";
+  return text
+    .replace(/\*\*/g, "**") // keep bold but remove redundant ones
+    .replace(/\* /g, "- ") // convert * to list item
+    .replace(/\*/g, ""); // remove leftover asterisks
+};
+
 const ResearchResults = ({ results }) => {
   if (!results) return null;
+
+  const cleanedSummary = cleanMarkdown(results.summary);
 
   return (
     <div className="bg-white rounded-2xl shadow-lg p-8 animate-fadeIn space-y-8">
@@ -131,17 +141,17 @@ const ResearchResults = ({ results }) => {
         </h4>
       </div>
 
-      {/* Research Summary - Markdown */}
+      {/* Render Cleaned Markdown */}
       <div className="prose prose-lg max-w-none prose-headings:font-bold prose-headings:text-gray-900 prose-p:leading-relaxed prose-li:leading-relaxed prose-li:ml-5 prose-ul:list-disc prose-ol:list-decimal prose-strong:text-indigo-700 prose-headings:mt-6 prose-headings:mb-3">
         <ReactMarkdown remarkPlugins={[remarkGfm]}>
-          {results.summary}
+          {cleanedSummary}
         </ReactMarkdown>
       </div>
 
-      {/* Sources Section */}
+      {/* Sources */}
       {results.sources && (
         <div className="bg-gray-50 rounded-xl p-4 border border-gray-200">
-          <h4 className="font-semibold text-gray-800 mb-2">📚 Sour</h4>
+          <h4 className="font-semibold text-gray-800 mb-2">📚 Sources</h4>
           <p className="text-gray-700 text-sm leading-relaxed">{results.sources}</p>
         </div>
       )}
