@@ -1016,8 +1016,21 @@ PORT = int(os.environ.get("PORT", 8000))
 GEMINI_KEY = os.getenv("GEMINI_API_KEY")
 HAS_GEMINI = bool(GEMINI_KEY and len(GEMINI_KEY) > 20)
 
+app = FastAPI(title="Academic Research Agent API", version="2.0.0")
+
+# ✅ Allow frontend to call the API
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],  
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+
 print(f"Port: {PORT}")
 print(f"Gemini Key: {'Available' if HAS_GEMINI else 'Missing'}")
+
 
 # ✅ List available Gemini models at startup
 if HAS_GEMINI:
