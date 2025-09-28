@@ -83,7 +83,7 @@
         sources: str
         tool_used: list[str]
 
-    llm = ChatGoogleGenerativeAI(model="gemini-1.5-flash", google_api_key=GEMINI_API_KEY, temperature=0.2)
+    llm = ChatGoogleGenerativeAI(model="gemini-1.5-flash-latest", google_api_key=GEMINI_API_KEY, temperature=0.2)
     parser = PydanticOutputParser(pydantic_object=ResearchResponse)
 
     prompt = ChatPromptTemplate.from_messages([
