@@ -726,7 +726,7 @@ def gemini_research(query: str) -> dict:
         import google.generativeai as genai
         genai.configure(api_key=GEMINI_KEY)
         
-        model = genai.GenerativeModel('gemini-1.5-flash')
+        model = genai.GenerativeModel('gemini-1.5-flash-latest')
         
         # Enhanced prompt for better structured responses
         prompt = f"""
@@ -780,7 +780,7 @@ def gemini_research(query: str) -> dict:
             "topic": query,
             "summary": formatted_summary,
             "sources": "Comprehensive AI analysis utilizing advanced language models trained on diverse academic sources, research papers, and industry best practices",
-            "tool_used": ["gemini-1.5-flash", "ai-research-analysis", "knowledge-synthesis"],
+            "tool_used": ["gemini-1.5-flash-latest", "ai-research-analysis", "knowledge-synthesis"],
             "timestamp": datetime.now().isoformat(),
             "id": f"research_{datetime.now().timestamp()}",
             "mode": "real_ai",

@@ -1,114 +1,114 @@
-# from dotenv import load_dotenv
-# from pydantic import BaseModel
-# from langchain_openai import ChatOpenAI
-# from langchain_anthropic import ChatAnthropic 
-# from langchain_google_genai import ChatGoogleGenerativeAI
-# from langchain_core.prompts import ChatPromptTemplate
-# from langchain_core.output_parsers import PydanticOutputParser
-# from langchain.agents import create_tool_calling_agent, AgentExecutor
-# from tools import search_tool, wiki_tool, save_tool
-# import os
+from dotenv import load_dotenv
+from pydantic import BaseModel
+from langchain_openai import ChatOpenAI
+from langchain_anthropic import ChatAnthropic 
+from langchain_google_genai import ChatGoogleGenerativeAI
+from langchain_core.prompts import ChatPromptTemplate
+from langchain_core.output_parsers import PydanticOutputParser
+from langchain.agents import create_tool_calling_agent, AgentExecutor
+from tools import search_tool, wiki_tool, save_tool
+import os
 
-# load_dotenv()
-# # load the gemini API key from .env
-# GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
+load_dotenv()
+# load the gemini API key from .env
+GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
 
-# class ResearchResponse(BaseModel):
-#     topic: str
-#     summary: str
-#     sources: str
-#     tool_used: list[str]
+class ResearchResponse(BaseModel):
+    topic: str
+    summary: str
+    sources: str
+    tool_used: list[str]
 
-# # llm = ChatOpenAI(model="gpt-4o-mini")
-# # llm = ChatAnthropic(model="claude-3-5-sonnet-20241022")
-# llm = ChatGoogleGenerativeAI(model="gemini-1.5-flash", google_api_key=GEMINI_API_KEY, temperature=0.2)
-# parser = PydanticOutputParser(pydantic_object=ResearchResponse)
+# llm = ChatOpenAI(model="gpt-4o-mini")
+# llm = ChatAnthropic(model="claude-3-5-sonnet-20241022")
+llm = ChatGoogleGenerativeAI(model="gemini-1.5-flash-latest", google_api_key=GEMINI_API_KEY, temperature=0.2)
+parser = PydanticOutputParser(pydantic_object=ResearchResponse)
 
-# prompt = ChatPromptTemplate.from_messages(
-#     [
-#         (
-#             "system",
-#             """
-#             You are a research assistant that will help generate a research paper
-#             Answer the user query and use the necessary tools.
-#             Wrap the output in this format and provide no other text\n{format_instructions}
-#             """,
-#         ),
-#         ("placeholder", "{chat_hostory}"),
-#         ("human", "{query}"),
-#         ("placeholder", "{agent_scratchpad}"),
-#     ]
-# ).partial(format_instructions=parser.get_format_instructions())
-
-# tools = [search_tool, wiki_tool, save_tool]
-# agent = create_tool_calling_agent(
-#     llm=llm, 
-#     prompt=prompt,
-#     tools=tools
-# )
-
-# agent_executor = AgentExecutor(agent=agent, tools=tools, verbose=True)
-
-# # CLI Mode - only runs when this file is executed directly
-# def run_cli():
-#     """Run the command line interface"""
-#     query = input("What can I help you research? ")
-#     raw_response = agent_executor.invoke({"query": query})
-
-#     try:
-#         structured_response = parser.parse(raw_response.get("output")[0]["text"])
-#         print(structured_response)
-#     except Exception as e:  
-#         print("Error Parsing response", e, "Raw Response - ", raw_response)
-
-# # Only run CLI when this file is executed directly (not imported)
-# if __name__ == "__main__":
-#     run_cli()
-
-    from dotenv import load_dotenv
-    from pydantic import BaseModel
-    from langchain_google_genai import ChatGoogleGenerativeAI
-    from langchain_core.prompts import ChatPromptTemplate
-    from langchain.output_parsers import PydanticOutputParser  # Changed this line
-    from langchain.agents import create_tool_calling_agent, AgentExecutor
-    from tools import search_tool, wiki_tool, save_tool
-    import os
-
-    load_dotenv()
-    GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
-
-    class ResearchResponse(BaseModel):
-        topic: str
-        summary: str
-        sources: str
-        tool_used: list[str]
-
-    llm = ChatGoogleGenerativeAI(model="gemini-1.5-flash-latest", google_api_key=GEMINI_API_KEY, temperature=0.2)
-    parser = PydanticOutputParser(pydantic_object=ResearchResponse)
-
-    prompt = ChatPromptTemplate.from_messages([
-        ("system", """
-        You are a research assistant that will help generate a research paper
-        Answer the user query and use the necessary tools.
-        Wrap the output in this format and provide no other text\n{format_instructions}
-        """),
+prompt = ChatPromptTemplate.from_messages(
+    [
+        (
+            "system",
+            """
+            You are a research assistant that will help generate a research paper
+            Answer the user query and use the necessary tools.
+            Wrap the output in this format and provide no other text\n{format_instructions}
+            """,
+        ),
         ("placeholder", "{chat_hostory}"),
         ("human", "{query}"),
         ("placeholder", "{agent_scratchpad}"),
-    ]).partial(format_instructions=parser.get_format_instructions())
+    ]
+).partial(format_instructions=parser.get_format_instructions())
 
-    tools = [search_tool, wiki_tool, save_tool]
-    agent = create_tool_calling_agent(llm=llm, prompt=prompt, tools=tools)
-    agent_executor = AgentExecutor(agent=agent, tools=tools, verbose=True)
+tools = [search_tool, wiki_tool, save_tool]
+agent = create_tool_calling_agent(
+    llm=llm, 
+    prompt=prompt,
+    tools=tools
+)
 
-    def run_cli():
-        query = input("What can I help you research? ")
-        raw_response = agent_executor.invoke({"query": query})
-        try:
-            structured_response = parser.parse(raw_response.get("output")[0]["text"])
-            print(structured_response)
-        except Exception as e:  
-            print("Error Parsing response", e, "Raw Response - ", raw_response)
+agent_executor = AgentExecutor(agent=agent, tools=tools, verbose=True)
 
-    if __name__ == "__main__":
-        run_cli()
+# CLI Mode - only runs when this file is executed directly
+def run_cli():
+    """Run the command line interface"""
+    query = input("What can I help you research? ")
+    raw_response = agent_executor.invoke({"query": query})
+
+    try:
+        structured_response = parser.parse(raw_response.get("output")[0]["text"])
+        print(structured_response)
+    except Exception as e:  
+        print("Error Parsing response", e, "Raw Response - ", raw_response)
+
+# Only run CLI when this file is executed directly (not imported)
+if __name__ == "__main__":
+    run_cli()
+
+    # from dotenv import load_dotenv
+    # from pydantic import BaseModel
+    # from langchain_google_genai import ChatGoogleGenerativeAI
+    # from langchain_core.prompts import ChatPromptTemplate
+    # from langchain.output_parsers import PydanticOutputParser  # Changed this line
+    # from langchain.agents import create_tool_calling_agent, AgentExecutor
+    # from tools import search_tool, wiki_tool, save_tool
+    # import os
+
+    # load_dotenv()
+    # GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
+
+    # class ResearchResponse(BaseModel):
+    #     topic: str
+    #     summary: str
+    #     sources: str
+    #     tool_used: list[str]
+
+    # llm = ChatGoogleGenerativeAI(model="gemini-1.5-flash-latest", google_api_key=GEMINI_API_KEY, temperature=0.2)
+    # parser = PydanticOutputParser(pydantic_object=ResearchResponse)
+
+    # prompt = ChatPromptTemplate.from_messages([
+    #     ("system", """
+    #     You are a research assistant that will help generate a research paper
+    #     Answer the user query and use the necessary tools.
+    #     Wrap the output in this format and provide no other text\n{format_instructions}
+    #     """),
+    #     ("placeholder", "{chat_hostory}"),
+    #     ("human", "{query}"),
+    #     ("placeholder", "{agent_scratchpad}"),
+    # ]).partial(format_instructions=parser.get_format_instructions())
+
+    # tools = [search_tool, wiki_tool, save_tool]
+    # agent = create_tool_calling_agent(llm=llm, prompt=prompt, tools=tools)
+    # agent_executor = AgentExecutor(agent=agent, tools=tools, verbose=True)
+
+    # def run_cli():
+    #     query = input("What can I help you research? ")
+    #     raw_response = agent_executor.invoke({"query": query})
+    #     try:
+    #         structured_response = parser.parse(raw_response.get("output")[0]["text"])
+    #         print(structured_response)
+    #     except Exception as e:  
+    #         print("Error Parsing response", e, "Raw Response - ", raw_response)
+
+    # if __name__ == "__main__":
+    #     run_cli()
