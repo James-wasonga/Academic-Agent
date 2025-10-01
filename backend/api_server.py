@@ -589,6 +589,417 @@
 #     )
 
 
+# from fastapi import FastAPI, HTTPException
+# from fastapi.middleware.cors import CORSMiddleware
+# from pydantic import BaseModel
+# from typing import List, Optional
+# import uvicorn
+# from datetime import datetime
+# import os
+# from dotenv import load_dotenv
+# import re
+
+# load_dotenv()
+
+# PORT = int(os.environ.get("PORT", 8000))
+# GEMINI_KEY = os.getenv("GEMINI_API_KEY")
+# HAS_GEMINI = bool(GEMINI_KEY and len(GEMINI_KEY) > 20)
+
+# print(f"Port: {PORT}")
+# print(f"Gemini Key: {'Available' if HAS_GEMINI else 'Missing'}")
+
+# def format_research_output(raw_text: str, query: str) -> str:
+#     """
+#     Format the raw Gemini response into a well-structured research report
+#     """
+#     # Clean up the raw text
+#     formatted_text = raw_text.strip()
+    
+#     # Add proper formatting structure
+#     formatted_report = f"""
+# # Research Analysis: {query}
+
+# ## Executive Summary
+# {_extract_or_create_summary(formatted_text)}
+
+# ## Detailed Analysis
+# {_format_main_content(formatted_text)}
+
+# ## Key Findings
+# {_extract_key_findings(formatted_text)}
+
+# ## Conclusions and Recommendations
+# {_extract_conclusions(formatted_text)}
+
+# ## Research Methodology
+# This analysis was conducted using advanced AI language models with access to comprehensive knowledge bases, providing insights based on established research, best practices, and current industry standards.
+
+# ---
+# *Generated on {datetime.now().strftime("%B %d, %Y at %I:%M %p")}*
+# """
+    
+#     return formatted_report.strip()
+
+# def _extract_or_create_summary(text: str) -> str:
+#     """Extract or create an executive summary"""
+#     # Look for existing summary patterns
+#     summary_patterns = [
+#         r"(?:summary|overview|introduction)[\s\S]*?(?=\n\n|\n#|\nKey|\nIn conclusion)",
+#         r"^.*?(?=\n\n|\n[A-Z])"
+#     ]
+    
+#     for pattern in summary_patterns:
+#         match = re.search(pattern, text, re.IGNORECASE | re.MULTILINE)
+#         if match and len(match.group().strip()) > 50:
+#             return match.group().strip()
+    
+#     # Create summary from first paragraph if no clear summary found
+#     first_para = text.split('\n\n')[0]
+#     return first_para if len(first_para) > 50 else text[:300] + "..."
+
+# def _format_main_content(text: str) -> str:
+#     """Format the main content with proper structure"""
+#     # Split content into sections
+#     lines = text.split('\n')
+#     formatted_lines = []
+    
+#     for line in lines:
+#         line = line.strip()
+#         if not line:
+#             continue
+            
+#         # Convert numbered lists to proper formatting
+#         if re.match(r'^\d+\.', line):
+#             formatted_lines.append(f"\n### {line}")
+#         # Convert bullet points
+#         elif line.startswith(('•', '-', '*')):
+#             formatted_lines.append(f"  - {line[1:].strip()}")
+#         # Handle headers
+#         elif line.isupper() and len(line) < 50:
+#             formatted_lines.append(f"\n### {line.title()}")
+#         else:
+#             formatted_lines.append(line)
+    
+#     return '\n'.join(formatted_lines)
+
+# def _extract_key_findings(text: str) -> str:
+#     """Extract or generate key findings"""
+#     # Look for existing findings
+#     findings_pattern = r"(?:key findings|findings|important points|highlights)[\s\S]*?(?=\n\n|\n#|\nConclusion)"
+#     match = re.search(findings_pattern, text, re.IGNORECASE)
+    
+#     if match:
+#         return match.group().strip()
+    
+#     # Generate key findings from numbered points or bullets
+#     points = re.findall(r'(?:\d+\.|•|-|\*)\s*([^\n]+)', text)
+#     if points:
+#         findings = "\n".join([f"- {point.strip()}" for point in points[:5]])
+#         return findings
+    
+#     return "Key insights derived from comprehensive analysis of the topic, covering fundamental concepts, practical applications, and current best practices."
+
+# def _extract_conclusions(text: str) -> str:
+#     """Extract or generate conclusions"""
+#     # Look for conclusion patterns
+#     conclusion_patterns = [
+#         r"(?:conclusion|summary|in conclusion|to conclude|recommendations)[\s\S]*$",
+#         r"(?:therefore|thus|in summary|overall)[\s\S]*$"
+#     ]
+    
+#     for pattern in conclusion_patterns:
+#         match = re.search(pattern, text, re.IGNORECASE | re.MULTILINE)
+#         if match and len(match.group().strip()) > 30:
+#             return match.group().strip()
+    
+#     # Generate from last paragraph
+#     last_para = text.split('\n\n')[-1]
+#     return last_para if len(last_para) > 30 else "This analysis provides comprehensive insights that can be applied to practical scenarios and further research."
+
+# # Enhanced research function using Gemini directly
+# def gemini_research(query: str) -> dict:
+#     """Direct Gemini API call for research with professional formatting"""
+#     if not HAS_GEMINI:
+#         return fallback_research(query)
+    
+#     try:
+#         import google.generativeai as genai
+#         genai.configure(api_key=GEMINI_KEY)
+        
+#         model = genai.GenerativeModel('gemini-1.5-flash-latest')
+        
+#         # Enhanced prompt for better structured responses
+#         prompt = f"""
+#         As a professional research analyst, conduct a comprehensive research analysis on: "{query}"
+
+#         Please provide a detailed, well-structured response that includes:
+
+#         1. EXECUTIVE SUMMARY: A brief overview of the topic and its significance
+        
+#         2. DETAILED ANALYSIS: 
+#            - Background and context
+#            - Current state and trends
+#            - Key concepts and definitions
+#            - Best practices and methodologies
+        
+#         3. KEY FINDINGS:
+#            - Most important discoveries or insights
+#            - Critical success factors
+#            - Common challenges and solutions
+        
+#         4. PRACTICAL APPLICATIONS:
+#            - Real-world use cases
+#            - Implementation strategies
+#            - Tools and resources
+        
+#         5. CONCLUSIONS AND RECOMMENDATIONS:
+#            - Summary of main points
+#            - Actionable recommendations
+#            - Future outlook
+        
+#         Make the response comprehensive, professional, and academically sound. Use clear headings, bullet points where appropriate, and ensure the content is well-organized and easy to follow.
+        
+#         Topic: {query}
+#         """
+        
+#         # Generate content with enhanced parameters
+#         response = model.generate_content(
+#             prompt,
+#             generation_config=genai.types.GenerationConfig(
+#                 temperature=0.7,
+#                 top_p=0.8,
+#                 top_k=40,
+#                 max_output_tokens=2048,
+#             )
+#         )
+        
+#         # Format the response for better presentation
+#         formatted_summary = format_research_output(response.text, query)
+        
+#         return {
+#             "topic": query,
+#             "summary": formatted_summary,
+#             "sources": "Comprehensive AI analysis utilizing advanced language models trained on diverse academic sources, research papers, and industry best practices",
+#             "tool_used": ["gemini-1.5-flash-latest", "ai-research-analysis", "knowledge-synthesis"],
+#             "timestamp": datetime.now().isoformat(),
+#             "id": f"research_{datetime.now().timestamp()}",
+#             "mode": "real_ai",
+#             "research_quality": "professional",
+#             "word_count": len(formatted_summary.split()),
+#             "sections": ["Executive Summary", "Detailed Analysis", "Key Findings", "Conclusions"]
+#         }
+        
+#     except Exception as e:
+#         print(f"Gemini research error: {e}")
+#         return fallback_research(query)
+
+# def fallback_research(query: str) -> dict:
+#     """Enhanced fallback research with better structure"""
+#     return {
+#         "topic": query,
+#         "summary": f"""
+# # Research Analysis: {query}
+
+# ## Executive Summary
+# Currently unable to perform AI-powered research analysis for '{query}'. The system requires proper API configuration to access advanced research capabilities.
+
+# ## System Status
+# - **Status**: Fallback Mode
+# - **Issue**: API configuration required
+# - **Resolution**: Configure Gemini API key for full functionality
+
+# ## Expected Capabilities
+# When properly configured, this system provides:
+# - Comprehensive topic analysis
+# - Professional research formatting
+# - Multi-source knowledge synthesis
+# - Structured academic reports
+
+# ## Next Steps
+# 1. Verify API key configuration
+# 2. Check network connectivity
+# 3. Retry research request
+
+# ---
+# *Generated on {datetime.now().strftime("%B %d, %Y at %I:%M %p")}*
+#         """,
+#         "sources": "System fallback mode - no external sources accessed",
+#         "tool_used": ["fallback-mode"],
+#         "timestamp": datetime.now().isoformat(),
+#         "id": f"research_{datetime.now().timestamp()}",
+#         "mode": "fallback",
+#         "research_quality": "limited"
+#     }
+
+# app = FastAPI(
+#     title="Academic Research Agent API",
+#     description="AI-powered research and grading assistant for educators with professional formatting",
+#     version="2.0.0"
+# )
+
+# app.add_middleware(
+#     CORSMiddleware,
+#     allow_origins=["*"],
+#     allow_credentials=True,
+#     allow_methods=["*"],
+#     allow_headers=["*"],
+# )
+
+# class ResearchRequest(BaseModel):
+#     query: str
+#     tools: Optional[List[str]] = ["gemini-ai", "knowledge-synthesis", "research-analysis"]
+
+# class GradingRequest(BaseModel):
+#     code: str
+#     language: str = "python"
+#     assignment_id: Optional[str] = None
+
+# class FeedbackItem(BaseModel):
+#     type: str  # 'error', 'warning', 'success'
+#     message: str
+#     line: Optional[int] = None
+
+# class GradingResponse(BaseModel):
+#     score: int
+#     feedback: List[FeedbackItem]
+#     suggestions: List[str]
+#     strengths: List[str]
+#     timestamp: str
+#     language: str
+
+# @app.post("/api/research")
+# async def research_endpoint(request: ResearchRequest):
+#     """
+#     Perform comprehensive research with professional formatting
+#     """
+#     try:
+#         result = gemini_research(request.query)
+#         print(f"Research completed for: {request.query} (Mode: {result.get('mode')}, Quality: {result.get('research_quality', 'standard')})")
+#         return result
+#     except Exception as e:
+#         print(f"Research endpoint error: {e}")
+#         return fallback_research(request.query)
+
+# @app.post("/api/grading/analyze", response_model=GradingResponse)
+# async def analyze_code(request: GradingRequest):
+#     """
+#     Enhanced code analysis and grading
+#     """
+#     try:
+#         import ast
+        
+#         score = 100
+#         feedback = []
+#         suggestions = []
+#         strengths = []
+        
+#         if request.language.lower() == "python":
+#             try:
+#                 tree = ast.parse(request.code)
+                
+#                 # Enhanced analysis
+#                 has_functions = any(isinstance(node, ast.FunctionDef) for node in ast.walk(tree))
+#                 has_classes = any(isinstance(node, ast.ClassDef) for node in ast.walk(tree))
+#                 has_try_except = any(isinstance(node, ast.Try) for node in ast.walk(tree))
+#                 has_docstrings = any(isinstance(node, ast.FunctionDef) and ast.get_docstring(node) for node in ast.walk(tree))
+#                 has_imports = any(isinstance(node, (ast.Import, ast.ImportFrom)) for node in ast.walk(tree))
+                
+#                 if has_functions:
+#                     strengths.append("Good use of functions for code organization")
+#                     if has_docstrings:
+#                         strengths.append("Excellent documentation with docstrings")
+#                 else:
+#                     feedback.append(FeedbackItem(
+#                         type="warning",
+#                         message="Consider breaking code into functions for better organization",
+#                         line=None
+#                     ))
+#                     score -= 10
+                
+#                 if has_classes:
+#                     strengths.append("Object-oriented programming implementation")
+                
+#                 if not has_try_except and len(request.code.split('\n')) > 10:
+#                     suggestions.append("Add error handling with try-except blocks")
+#                     score -= 5
+                
+#                 if has_imports:
+#                     strengths.append("Proper use of imports and modules")
+                
+#                 # Check for comments
+#                 comment_lines = [line for line in request.code.split('\n') if line.strip().startswith('#')]
+#                 if comment_lines:
+#                     strengths.append("Good code documentation with comments")
+#                 else:
+#                     suggestions.append("Add comments to explain complex logic")
+                
+#                 if not strengths:
+#                     strengths.append("Code compiles successfully")
+                    
+#             except SyntaxError as e:
+#                 feedback.append(FeedbackItem(
+#                     type="error", 
+#                     message=f"Syntax error: {e.msg}",
+#                     line=e.lineno
+#                 ))
+#                 score -= 30
+#                 suggestions.append("Fix syntax errors before submission")
+        
+#         return GradingResponse(
+#             score=max(0, score),
+#             feedback=feedback,
+#             suggestions=suggestions,
+#             strengths=strengths,
+#             timestamp=datetime.now().isoformat(),
+#             language=request.language
+#         )
+        
+#     except Exception as e:
+#         raise HTTPException(status_code=500, detail=f"Code analysis failed: {str(e)}")
+
+# @app.get("/health")
+# async def health_check():
+#     return {
+#         "status": "healthy",
+#         "service": "Academic Research Agent API", 
+#         "version": "2.0.0",
+#         "port": PORT,
+#         "api_keys": {"gemini": HAS_GEMINI},
+#         "real_ai": HAS_GEMINI,
+#         "mode": "real_ai" if HAS_GEMINI else "fallback",
+#         "features": {
+#             "professional_formatting": True,
+#             "structured_reports": True,
+#             "enhanced_analysis": True,
+#             "code_grading": True
+#         },
+#         "message": "API is running with enhanced research capabilities"
+#     }
+
+# @app.get("/")
+# async def root():
+#     return {
+#         "message": "Academic Research Agent API v2.0",
+#         "status": "running", 
+#         "mode": "real_ai" if HAS_GEMINI else "fallback",
+#         "features": ["Professional Research Reports", "Code Analysis", "Academic Formatting"],
+#         "docs": "/docs"
+#     }
+
+# @app.get("/api/research/history")
+# async def get_research_history():
+#     return {"history": [], "message": "History feature coming soon"}
+
+# @app.get("/api/grading/history") 
+# async def get_grading_history():
+#     return {"history": [], "message": "History feature coming soon"}
+
+# if __name__ == "__main__":
+#     print("🚀 Starting Academic Research Agent API v2.0...")
+#     print("📊 Features: Professional Research Formatting, Enhanced Code Analysis")
+#     print(f"🔑 Gemini AI: {'Enabled' if HAS_GEMINI else 'Disabled'}")
+#     uvicorn.run(app, host="0.0.0.0", port=PORT, reload=False)
+
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
@@ -599,6 +1010,7 @@ import os
 from dotenv import load_dotenv
 import re
 
+# -------------------- ENV --------------------
 load_dotenv()
 
 PORT = int(os.environ.get("PORT", 8000))
@@ -608,14 +1020,11 @@ HAS_GEMINI = bool(GEMINI_KEY and len(GEMINI_KEY) > 20)
 print(f"Port: {PORT}")
 print(f"Gemini Key: {'Available' if HAS_GEMINI else 'Missing'}")
 
+# -------------------- FORMATTING HELPERS --------------------
 def format_research_output(raw_text: str, query: str) -> str:
-    """
-    Format the raw Gemini response into a well-structured research report
-    """
-    # Clean up the raw text
+    """Format the raw Gemini response into a well-structured research report"""
     formatted_text = raw_text.strip()
     
-    # Add proper formatting structure
     formatted_report = f"""
 # Research Analysis: {query}
 
@@ -637,193 +1046,155 @@ This analysis was conducted using advanced AI language models with access to com
 ---
 *Generated on {datetime.now().strftime("%B %d, %Y at %I:%M %p")}*
 """
-    
     return formatted_report.strip()
 
 def _extract_or_create_summary(text: str) -> str:
-    """Extract or create an executive summary"""
-    # Look for existing summary patterns
     summary_patterns = [
         r"(?:summary|overview|introduction)[\s\S]*?(?=\n\n|\n#|\nKey|\nIn conclusion)",
         r"^.*?(?=\n\n|\n[A-Z])"
     ]
-    
     for pattern in summary_patterns:
         match = re.search(pattern, text, re.IGNORECASE | re.MULTILINE)
         if match and len(match.group().strip()) > 50:
             return match.group().strip()
-    
-    # Create summary from first paragraph if no clear summary found
     first_para = text.split('\n\n')[0]
     return first_para if len(first_para) > 50 else text[:300] + "..."
 
 def _format_main_content(text: str) -> str:
-    """Format the main content with proper structure"""
-    # Split content into sections
     lines = text.split('\n')
     formatted_lines = []
-    
     for line in lines:
         line = line.strip()
         if not line:
             continue
-            
-        # Convert numbered lists to proper formatting
         if re.match(r'^\d+\.', line):
             formatted_lines.append(f"\n### {line}")
-        # Convert bullet points
         elif line.startswith(('•', '-', '*')):
             formatted_lines.append(f"  - {line[1:].strip()}")
-        # Handle headers
         elif line.isupper() and len(line) < 50:
             formatted_lines.append(f"\n### {line.title()}")
         else:
             formatted_lines.append(line)
-    
     return '\n'.join(formatted_lines)
 
 def _extract_key_findings(text: str) -> str:
-    """Extract or generate key findings"""
-    # Look for existing findings
     findings_pattern = r"(?:key findings|findings|important points|highlights)[\s\S]*?(?=\n\n|\n#|\nConclusion)"
     match = re.search(findings_pattern, text, re.IGNORECASE)
-    
     if match:
         return match.group().strip()
-    
-    # Generate key findings from numbered points or bullets
     points = re.findall(r'(?:\d+\.|•|-|\*)\s*([^\n]+)', text)
     if points:
         findings = "\n".join([f"- {point.strip()}" for point in points[:5]])
         return findings
-    
-    return "Key insights derived from comprehensive analysis of the topic, covering fundamental concepts, practical applications, and current best practices."
+    return "Key insights derived from comprehensive analysis of the topic."
 
 def _extract_conclusions(text: str) -> str:
-    """Extract or generate conclusions"""
-    # Look for conclusion patterns
     conclusion_patterns = [
         r"(?:conclusion|summary|in conclusion|to conclude|recommendations)[\s\S]*$",
         r"(?:therefore|thus|in summary|overall)[\s\S]*$"
     ]
-    
     for pattern in conclusion_patterns:
         match = re.search(pattern, text, re.IGNORECASE | re.MULTILINE)
         if match and len(match.group().strip()) > 30:
             return match.group().strip()
-    
-    # Generate from last paragraph
     last_para = text.split('\n\n')[-1]
-    return last_para if len(last_para) > 30 else "This analysis provides comprehensive insights that can be applied to practical scenarios and further research."
+    return last_para if len(last_para) > 30 else "This analysis provides insights that can be applied to practical scenarios."
 
-# Enhanced research function using Gemini directly
+# -------------------- GEMINI --------------------
+# -------------------- GEMINI --------------------
 def gemini_research(query: str) -> dict:
-    """Direct Gemini API call for research with professional formatting"""
+    """Call Gemini API directly using v1 endpoint"""
     if not HAS_GEMINI:
         return fallback_research(query)
-    
+
     try:
         import google.generativeai as genai
+
+        # ✅ Correct endpoint (v1)
         genai.configure(api_key=GEMINI_KEY)
-        
-        model = genai.GenerativeModel('gemini-1.5-flash-latest')
-        
-        # Enhanced prompt for better structured responses
+
+        # List models for debug
+        print("📑 Available models:")
+        try:
+            for m in genai.list_models():
+                print(" -", m.name)
+        except Exception as e:
+            print("⚠️ Could not list models:", e)
+
+        # ✅ Supported v1 models
+        model_names = [
+            "gemini-1.5-pro",
+            "gemini-1.5-flash",
+            "gemini-2.0-flash-exp"
+        ]
+
+        model = None
+        model_used = None
+
+        for model_name in model_names:
+            try:
+                print(f"🔄 Trying model: {model_name}")
+                test_model = genai.GenerativeModel(model_name)
+                response = test_model.generate_content("Test connection to Gemini API (v1)")
+                print(f"✅ Model {model_name} works! Sample: {response.text[:40]}")
+                model = test_model
+                model_used = model_name
+                break
+            except Exception as e:
+                print(f"❌ Model {model_name} failed: {str(e)[:100]}")
+                continue
+
+        if model is None:
+            raise Exception("No Gemini model could be initialized")
+
+        # Research prompt
         prompt = f"""
-        As a professional research analyst, conduct a comprehensive research analysis on: "{query}"
-
-        Please provide a detailed, well-structured response that includes:
-
-        1. EXECUTIVE SUMMARY: A brief overview of the topic and its significance
-        
-        2. DETAILED ANALYSIS: 
-           - Background and context
-           - Current state and trends
-           - Key concepts and definitions
-           - Best practices and methodologies
-        
-        3. KEY FINDINGS:
-           - Most important discoveries or insights
-           - Critical success factors
-           - Common challenges and solutions
-        
-        4. PRACTICAL APPLICATIONS:
-           - Real-world use cases
-           - Implementation strategies
-           - Tools and resources
-        
-        5. CONCLUSIONS AND RECOMMENDATIONS:
-           - Summary of main points
-           - Actionable recommendations
-           - Future outlook
-        
-        Make the response comprehensive, professional, and academically sound. Use clear headings, bullet points where appropriate, and ensure the content is well-organized and easy to follow.
-        
-        Topic: {query}
+        Provide a professional, structured research analysis on: "{query}".
+        Include executive summary, detailed analysis, key findings, practical applications, and conclusions.
         """
-        
-        # Generate content with enhanced parameters
+
         response = model.generate_content(
             prompt,
-            generation_config=genai.types.GenerationConfig(
-                temperature=0.7,
-                top_p=0.8,
-                top_k=40,
-                max_output_tokens=2048,
-            )
+            generation_config={
+                "temperature": 0.7,
+                "top_p": 0.8,
+                "top_k": 40,
+                "max_output_tokens": 2048,
+            }
         )
-        
-        # Format the response for better presentation
+
         formatted_summary = format_research_output(response.text, query)
-        
+
         return {
             "topic": query,
             "summary": formatted_summary,
-            "sources": "Comprehensive AI analysis utilizing advanced language models trained on diverse academic sources, research papers, and industry best practices",
-            "tool_used": ["gemini-1.5-flash-latest", "ai-research-analysis", "knowledge-synthesis"],
+            "sources": "Comprehensive AI analysis from Gemini",
+            "tool_used": [model_used, "ai-research-analysis"],
             "timestamp": datetime.now().isoformat(),
             "id": f"research_{datetime.now().timestamp()}",
             "mode": "real_ai",
             "research_quality": "professional",
             "word_count": len(formatted_summary.split()),
-            "sections": ["Executive Summary", "Detailed Analysis", "Key Findings", "Conclusions"]
         }
-        
+
     except Exception as e:
         print(f"Gemini research error: {e}")
         return fallback_research(query)
 
+
 def fallback_research(query: str) -> dict:
-    """Enhanced fallback research with better structure"""
     return {
         "topic": query,
         "summary": f"""
 # Research Analysis: {query}
 
 ## Executive Summary
-Currently unable to perform AI-powered research analysis for '{query}'. The system requires proper API configuration to access advanced research capabilities.
-
-## System Status
-- **Status**: Fallback Mode
-- **Issue**: API configuration required
-- **Resolution**: Configure Gemini API key for full functionality
-
-## Expected Capabilities
-When properly configured, this system provides:
-- Comprehensive topic analysis
-- Professional research formatting
-- Multi-source knowledge synthesis
-- Structured academic reports
-
-## Next Steps
-1. Verify API key configuration
-2. Check network connectivity
-3. Retry research request
+Currently unable to perform AI-powered research analysis for '{query}'. API configuration required.
 
 ---
 *Generated on {datetime.now().strftime("%B %d, %Y at %I:%M %p")}*
         """,
-        "sources": "System fallback mode - no external sources accessed",
+        "sources": "System fallback mode",
         "tool_used": ["fallback-mode"],
         "timestamp": datetime.now().isoformat(),
         "id": f"research_{datetime.now().timestamp()}",
@@ -831,9 +1202,9 @@ When properly configured, this system provides:
         "research_quality": "limited"
     }
 
+# -------------------- FASTAPI APP --------------------
 app = FastAPI(
     title="Academic Research Agent API",
-    description="AI-powered research and grading assistant for educators with professional formatting",
     version="2.0.0"
 )
 
@@ -847,155 +1218,33 @@ app.add_middleware(
 
 class ResearchRequest(BaseModel):
     query: str
-    tools: Optional[List[str]] = ["gemini-ai", "knowledge-synthesis", "research-analysis"]
-
-class GradingRequest(BaseModel):
-    code: str
-    language: str = "python"
-    assignment_id: Optional[str] = None
-
-class FeedbackItem(BaseModel):
-    type: str  # 'error', 'warning', 'success'
-    message: str
-    line: Optional[int] = None
-
-class GradingResponse(BaseModel):
-    score: int
-    feedback: List[FeedbackItem]
-    suggestions: List[str]
-    strengths: List[str]
-    timestamp: str
-    language: str
+    tools: Optional[List[str]] = ["gemini-ai"]
 
 @app.post("/api/research")
 async def research_endpoint(request: ResearchRequest):
-    """
-    Perform comprehensive research with professional formatting
-    """
-    try:
-        result = gemini_research(request.query)
-        print(f"Research completed for: {request.query} (Mode: {result.get('mode')}, Quality: {result.get('research_quality', 'standard')})")
-        return result
-    except Exception as e:
-        print(f"Research endpoint error: {e}")
-        return fallback_research(request.query)
+    result = gemini_research(request.query)
+    print(f"Research completed for: {request.query} (Mode: {result.get('mode')})")
+    return result
 
-@app.post("/api/grading/analyze", response_model=GradingResponse)
-async def analyze_code(request: GradingRequest):
-    """
-    Enhanced code analysis and grading
-    """
+@app.get("/api/models")
+async def list_models():
     try:
-        import ast
-        
-        score = 100
-        feedback = []
-        suggestions = []
-        strengths = []
-        
-        if request.language.lower() == "python":
-            try:
-                tree = ast.parse(request.code)
-                
-                # Enhanced analysis
-                has_functions = any(isinstance(node, ast.FunctionDef) for node in ast.walk(tree))
-                has_classes = any(isinstance(node, ast.ClassDef) for node in ast.walk(tree))
-                has_try_except = any(isinstance(node, ast.Try) for node in ast.walk(tree))
-                has_docstrings = any(isinstance(node, ast.FunctionDef) and ast.get_docstring(node) for node in ast.walk(tree))
-                has_imports = any(isinstance(node, (ast.Import, ast.ImportFrom)) for node in ast.walk(tree))
-                
-                if has_functions:
-                    strengths.append("Good use of functions for code organization")
-                    if has_docstrings:
-                        strengths.append("Excellent documentation with docstrings")
-                else:
-                    feedback.append(FeedbackItem(
-                        type="warning",
-                        message="Consider breaking code into functions for better organization",
-                        line=None
-                    ))
-                    score -= 10
-                
-                if has_classes:
-                    strengths.append("Object-oriented programming implementation")
-                
-                if not has_try_except and len(request.code.split('\n')) > 10:
-                    suggestions.append("Add error handling with try-except blocks")
-                    score -= 5
-                
-                if has_imports:
-                    strengths.append("Proper use of imports and modules")
-                
-                # Check for comments
-                comment_lines = [line for line in request.code.split('\n') if line.strip().startswith('#')]
-                if comment_lines:
-                    strengths.append("Good code documentation with comments")
-                else:
-                    suggestions.append("Add comments to explain complex logic")
-                
-                if not strengths:
-                    strengths.append("Code compiles successfully")
-                    
-            except SyntaxError as e:
-                feedback.append(FeedbackItem(
-                    type="error", 
-                    message=f"Syntax error: {e.msg}",
-                    line=e.lineno
-                ))
-                score -= 30
-                suggestions.append("Fix syntax errors before submission")
-        
-        return GradingResponse(
-            score=max(0, score),
-            feedback=feedback,
-            suggestions=suggestions,
-            strengths=strengths,
-            timestamp=datetime.now().isoformat(),
-            language=request.language
-        )
-        
+        import google.generativeai as genai
+        genai.configure(api_key=GEMINI_KEY)
+        models = genai.list_models()
+        return {"models": [m.name for m in models]}
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Code analysis failed: {str(e)}")
+        return {"error": str(e)}
 
 @app.get("/health")
 async def health_check():
     return {
         "status": "healthy",
-        "service": "Academic Research Agent API", 
-        "version": "2.0.0",
-        "port": PORT,
-        "api_keys": {"gemini": HAS_GEMINI},
-        "real_ai": HAS_GEMINI,
         "mode": "real_ai" if HAS_GEMINI else "fallback",
-        "features": {
-            "professional_formatting": True,
-            "structured_reports": True,
-            "enhanced_analysis": True,
-            "code_grading": True
-        },
-        "message": "API is running with enhanced research capabilities"
+        "gemini_key": HAS_GEMINI
     }
-
-@app.get("/")
-async def root():
-    return {
-        "message": "Academic Research Agent API v2.0",
-        "status": "running", 
-        "mode": "real_ai" if HAS_GEMINI else "fallback",
-        "features": ["Professional Research Reports", "Code Analysis", "Academic Formatting"],
-        "docs": "/docs"
-    }
-
-@app.get("/api/research/history")
-async def get_research_history():
-    return {"history": [], "message": "History feature coming soon"}
-
-@app.get("/api/grading/history") 
-async def get_grading_history():
-    return {"history": [], "message": "History feature coming soon"}
 
 if __name__ == "__main__":
     print("🚀 Starting Academic Research Agent API v2.0...")
-    print("📊 Features: Professional Research Formatting, Enhanced Code Analysis")
     print(f"🔑 Gemini AI: {'Enabled' if HAS_GEMINI else 'Disabled'}")
     uvicorn.run(app, host="0.0.0.0", port=PORT, reload=False)
