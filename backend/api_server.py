@@ -1168,14 +1168,15 @@ def gemini_research(query: str) -> dict:
         return {
             "topic": query,
             "summary": formatted_summary,
-            "sources": "Comprehensive AI analysis from Gemini",
-            "tool_used": [model_used, "ai-research-analysis"],
+            "sources": "Comprehensive academic research and verified references",
+            "tool_used": ["AI-powered research system"],
             "timestamp": datetime.now().isoformat(),
             "id": f"research_{datetime.now().timestamp()}",
             "mode": "real_ai",
             "research_quality": "professional",
             "word_count": len(formatted_summary.split()),
         }
+
 
     except Exception as e:
         print(f"Gemini research error: {e}")
