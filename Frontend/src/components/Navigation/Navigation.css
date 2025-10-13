@@ -1,0 +1,66 @@
+/* Desktop - show full labels with icons */
+.nav-label {
+  display: inline;
+}
+
+.nav-icon {
+  display: inline-block;
+}
+
+/* Mobile styles - Icons only, hide text labels */
+@media (max-width: 768px) {
+  .nav-tabs {
+    justify-content: space-around;
+    gap: 0 !important;
+    padding: 0;
+  }
+
+  .nav-tabs button {
+    flex: 1;
+    padding: 0.75rem 0.5rem !important;
+    white-space: nowrap;
+    min-width: 0;
+    justify-content: center;
+    gap: 0 !important;
+  }
+
+  /* Hide text labels on mobile, show only icons */
+  .nav-label {
+    display: none;
+  }
+
+  .nav-icon {
+    display: inline-block;
+    width: 1.5rem !important;
+    height: 1.5rem !important;
+  }
+}
+
+@media (max-width: 480px) {
+  .nav-tabs {
+    padding: 0;
+    justify-content: space-around;
+  }
+
+  .nav-tabs button {
+    font-size: 0.75rem !important;
+    padding: 0.75rem 0.5rem !important;
+  }
+
+  .nav-icon {
+    width: 1.25rem !important;
+    height: 1.25rem !important;
+  }
+}
+
+/* Very small phones */
+@media (max-width: 380px) {
+  .nav-tabs button {
+    padding: 0.75rem 0.25rem !important;
+  }
+
+  .nav-icon {
+    width: 1rem !important;
+    height: 1rem !important;
+  }
+}

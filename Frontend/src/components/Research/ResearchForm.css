@@ -1,0 +1,32 @@
+/* Mobile styles ONLY - Desktop remains unchanged */
+@media (max-width: 768px) {
+    .research-input-group {
+      flex-direction: column !important;
+      gap: 0.75rem !important;
+      margin: 0 !important;
+    }
+  
+    .research-submit-btn {
+      width: 100%;
+      justify-content: center;
+    }
+  }
+  
+  @media (max-width: 480px) {
+    .research-input-group input {
+      font-size: 0.875rem !important;
+      padding: 0.625rem 0.875rem !important;
+    }
+  
+    .research-submit-btn {
+      font-size: 0.875rem !important;
+      padding: 0.625rem 1rem !important;
+    }
+  
+    .research-submit-btn .w-4 {
+      width: 0.875rem !important;
+      height: 0.875rem !important;
+    }
+  }
+
+  
