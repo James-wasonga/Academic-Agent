@@ -2,6 +2,7 @@ import React from 'react';
 import { BookOpen, Code, MessageCircle, CheckCircle, RotateCcw } from 'lucide-react';
 import StatCard from './StatCard';
 import { useAppContext } from '../../context/AppContext';
+import './Dashboard.css';
 
 const Dashboard = () => {
   const { stats, getAverageGrade, resetStats } = useAppContext();
@@ -25,7 +26,7 @@ const Dashboard = () => {
         </button>
       </div>
       
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+      <div className="dashboard-grid grid grid-cols-1 md:grid-cols-4 gap-6">
         <StatCard 
           icon={BookOpen} 
           title="Research Queries" 
@@ -60,7 +61,6 @@ const Dashboard = () => {
 };
 
 export default Dashboard;
-
 // import React from 'react';
 // import { BookOpen, Code, MessageCircle, CheckCircle, RotateCcw } from 'lucide-react';
 // import StatCard from './StatCard';
