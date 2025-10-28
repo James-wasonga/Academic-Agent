@@ -15,7 +15,7 @@ const Grading = () => {
     // show success grading
     setToast({
       type: 'success',
-      message: '🎉Grading completed successfully!, Your results are ready'
+      message: '🎉Grading completed successfully!, Your results are ready, scroll down'
     })
     } catch(e) {
       //show error
