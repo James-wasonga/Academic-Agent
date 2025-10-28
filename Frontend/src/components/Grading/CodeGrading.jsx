@@ -334,7 +334,7 @@ return (
           <select
             value={selectedLanguage}
             onChange={(e) => setSelectedLanguage(e.target.value)}
-            className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent bg-white"
+            className="px-4 py-2 border border-blue-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white text-blue-700 font-bold"
           >
             {languages.map(lang => (
               <option key={lang.value} value={lang.value}>
@@ -345,7 +345,7 @@ return (
           
           <div className="flex items-center px-3 py-2 bg-blue-50 border border-blue-200 rounded-lg text-sm">
             <span className="text-blue-700">
-              Detected: <span className="font-semibold">{languages.find(l => l.value === selectedLanguage)?.label}</span>
+              Detected: <span className="font-bold text-blue-600">{languages.find(l => l.value === selectedLanguage)?.label}</span>
             </span>
           </div>
         </div>
