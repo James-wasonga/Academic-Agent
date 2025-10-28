@@ -9,9 +9,9 @@ const Grading = () => {
   const [toast, setToast] = useState(null);
   const { loading, gradingResults, gradeCode } = useGrading();
 
-  const handleCodeGrading = async (code) => {
+  const handleCodeGrading = async (code, language) => {
      try{
-    await gradeCode(code, 'python');
+    await gradeCode(code, language);
     // show success grading
     setToast({
       type: 'success',
