@@ -1,0 +1,20 @@
+[
+  {
+    "id": 1,
+    "sender_id": "user_x9upobyov",
+    "sender_name": "George",
+    "receiver_id": "user_1761763812048_jz05jtvfh",
+    "message": "Hello",
+    "timestamp": "2025-10-29T19:42:53.474917+00:00",
+    "read": true
+  },
+  {
+    "id": 2,
+    "sender_id": "user_1761763812048_jz05jtvfh",
+    "sender_name": "Jane Atieno",
+    "receiver_id": "user_x9upobyov",
+    "message": "Hello",
+    "timestamp": "2025-10-29T19:43:03.148503+00:00",
+    "read": true
+  }
+]
