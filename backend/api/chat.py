@@ -80,7 +80,7 @@ async def check_username(data: UsernameCheck):
         if user["name"].lower() == username_lower:
             return {
                 "available": False,
-                "message": "This name is already taken. Please use a unique name or add your last name (e.g., 'James Ouma')."
+                "message": "This name is already taken. Please use a unique name or add your last name (e.g., 'James Wasonga')."
             }
     
     # Check if it's a single name (no space)
