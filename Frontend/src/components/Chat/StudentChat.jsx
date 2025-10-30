@@ -6,7 +6,8 @@ import Toast from '../Toast/Toast';
 import axios from 'axios';
 import './StudentChat.css';
 
-const API_URL = 'http://localhost:8000/api/chat';
+// const API_URL = 'http://localhost:8000/api/chat';
+const API_URL = `${import.meta.env.VITE_API_URL}/api/chat`;
 
 const StudentChat = () => {
   const [activeMode, setActiveMode] = useState('peer'); // Default to peer mode
