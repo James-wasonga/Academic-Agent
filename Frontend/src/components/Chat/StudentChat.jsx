@@ -327,7 +327,7 @@ const StudentChat = () => {
                     type="text"
                     value={username}
                     onChange={handleUsernameChange}
-                    placeholder="e.g., James Ouma"
+                    placeholder="e.g., James Wasonga"
                     className={`form-input ${usernameError ? 'input-error' : usernameValid ? 'input-success' : ''}`}
                     autoFocus
                   />
