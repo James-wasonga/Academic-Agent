@@ -1,4 +1,4 @@
-/* Mobile styles ONLY - Desktop grid-cols-4 remains unchanged */
+/* Mobile styles ONLY*/
 @media (max-width: 1024px) {
     .dashboard-grid {
       grid-template-columns: repeat(2, 1fr) !important;
