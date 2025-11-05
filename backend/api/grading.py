@@ -135,48 +135,6 @@ def analyze_python_code(code: str) -> Dict[str, Any]:
         "suggestions": suggestions,
         "strengths": strengths
     }
-    
-# Add more code analysis functions
-
-# @router.post("/analyze", response_model=GradingResponse)
-# async def analyze_code(request: CodeAnalysisRequest):
-#     try:
-#         if request.language.lower() == "python":
-#             analysis = analyze_python_code(request.code)
-#         else:
-#             # Basic analysis for other languages
-#             analysis = {
-#                 "score": 75,
-#                 "feedback": [
-#                     FeedbackItem(
-#                         type="success",
-#                         message="Code structure looks good",
-#                         line=None
-#                     )
-#                 ],
-#                 "suggestions": ["Add comments for better code documentation"],
-#                 "strengths": ["Clean code structure", "Proper formatting"]
-#             }
-        
-#         return GradingResponse(
-#             score=analysis["score"],
-#             feedback=analysis["feedback"],
-#             suggestions=analysis["suggestions"],
-#             strengths=analysis["strengths"],
-#             timestamp=datetime.now().isoformat(),
-#             language=request.language
-#         )
-        
-#     except Exception as e:
-#         raise HTTPException(status_code=500, detail=f"Code analysis failed: {str(e)}")
-
-# @router.get("/history")
-# async def get_grading_history():
-#     return {"history": []}
-
-# @router.post("/{grading_id}/feedback")
-# async def submit_feedback(grading_id: str, feedback: dict):
-#     return {"message": "Feedback submitted successfully", "grading_id": grading_id}
 
 def analyze_javascript_code(code: str) -> Dict[str, Any]:
     """Analyze JavaScript code"""
