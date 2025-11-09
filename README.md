@@ -1,6 +1,5 @@
 ﻿# AcaWise
 AcaWise is an AI-powered academic and developer assistant designed to help students, researchers, and developers work smarter, all in one place. It combines intelligent research generation, code grading, and personalized learning to enhance productivity and academic excellence.
-The project is built on Flow
 
 <img width="1239" height="547" alt="AcaWise copy" src="https://github.com/user-attachments/assets/6eb5d6d2-fdd9-4663-bddc-6b43deb46bc8" />
 
