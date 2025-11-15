@@ -1595,25 +1595,41 @@ def gemini_research(query: str) -> dict:
         import google.generativeai as genai
         genai.configure(api_key=GEMINI_KEY)
 
+        # ✅ Use NEW model names that actually exist
         model_names = [
-            "gemini-1.5-pro",
-            "gemini-1.5-flash",
-            "gemini-2.0-flash-exp"
+            "gemini-2.0-flash",           # Fast and efficient
+            "gemini-2.5-flash",           # Latest flash model
+            "gemini-2.5-pro",             # Most capable
+            "gemini-flash-latest",        # Always points to latest flash
         ]
 
         model = None
+        last_error = None
+        
         for model_name in model_names:
             try:
+                print(f"🔄 Trying model: {model_name}")
                 test_model = genai.GenerativeModel(model_name)
-                response = test_model.generate_content("Test connection")
+                
+                # Quick test
+                test_response = test_model.generate_content(
+                    "Test",
+                    generation_config={"max_output_tokens": 10}
+                )
+                
+                print(f"✅ Model {model_name} works!")
                 model = test_model
                 break
-            except Exception:
+                
+            except Exception as e:
+                print(f"❌ Model {model_name} failed: {str(e)}")
+                last_error = e
                 continue
 
         if model is None:
-            raise Exception("No Gemini model available")
+            raise Exception(f"All models failed. Last error: {last_error}")
 
+        # Generate actual research
         prompt = f"""
         Provide a professional, structured research analysis on: "{query}".
         Include executive summary, detailed analysis, key findings, practical applications, and conclusions.
@@ -1635,7 +1651,7 @@ def gemini_research(query: str) -> dict:
             "topic": query,
             "summary": formatted_summary,
             "sources": "Comprehensive academic research and verified references",
-            "tool_used": ["AI-powered research system"],
+            "tool_used": ["AI-powered research system", model_name],  # Include which model was used
             "timestamp": datetime.now().isoformat(),
             "id": f"research_{datetime.now().timestamp()}",
             "mode": "real_ai",
@@ -1644,7 +1660,9 @@ def gemini_research(query: str) -> dict:
         }
 
     except Exception as e:
-        print(f"Gemini research error: {e}")
+        print(f"❌ Gemini research error: {e}")
+        import traceback
+        traceback.print_exc()
         return fallback_research(query)
 
 def fallback_research(query: str) -> dict:
