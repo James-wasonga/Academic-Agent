@@ -1,0 +1,253 @@
+
+<!-- import React, { useState } from 'react';
+import { BookOpen, Code, MessageSquare, BarChart3, Download, CheckCircle, Sparkles, ArrowRight } from 'lucide-react';
+
+export default function AcaWiseLanding() {
+  const [appUrl, setAppUrl] = useState('');
+
+  const features = [
+    {
+      icon: <BookOpen className="w-8 h-8" />,
+      title: "Research Assistant",
+      description: "Generate well-structured academic research papers in seconds. Get organized, refined notes on any topic.",
+      highlights: [
+        "Structured academic research",
+        "Save as TXT for later use",
+        "Export as PDF for easy reading",
+        "Markdown support"
+      ],
+      color: "from-blue-500 to-cyan-500"
+    },
+    {
+      icon: <Code className="w-8 h-8" />,
+      title: "Code Grading & Feedback",
+      description: "Instantly analyze your code without repeatedly asking 'where's the error?' Get automatic feedback.",
+      highlights: [
+        "Syntax error detection 🪲",
+        "Code quality analysis 👨‍💻",
+        "Improvement suggestions ✨",
+        "Strength evaluation 💪"
+      ],
+      color: "from-purple-500 to-pink-500"
+    },
+    {
+      icon: <MessageSquare className="w-8 h-8" />,
+      title: "Student Q&A",
+      description: "Ask academic questions and get instant AI-powered answers with personalized learning recommendations.",
+      highlights: [
+        "Instant answers",
+        "Coding help",
+        "Learning recommendations",
+        "Coming Soon!"
+      ],
+      color: "from-green-500 to-emerald-500"
+    },
+    {
+      icon: <BarChart3 className="w-8 h-8" />,
+      title: "Dashboard & Tracking",
+      description: "Keep track of all your activities. Your data stays safe even after refreshing, stored locally.",
+      highlights: [
+        "Activity tracking",
+        "Local browser storage",
+        "Persistent across sessions",
+        "Reset anytime you want"
+      ],
+      color: "from-orange-500 to-red-500"
+    }
+  ];
+
+  const handleLaunchApp = () => {
+    // Replace this URL with your actual app URL
+    const url = appUrl || 'https://your-acawise-app-url.com';
+    window.open(url, '_blank');
+  };
+
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 text-white">
+      {/* Header */}
+      <header className="fixed top-0 w-full bg-black/20 backdrop-blur-lg border-b border-white/10 z-50">
+        <div className="max-w-7xl mx-auto px-6 py-4 flex justify-between items-center">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg flex items-center justify-center">
+              <Sparkles className="w-6 h-6" />
+            </div>
+            <span className="text-2xl font-bold bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">
+              AcaWise
+            </span>
+          </div>
+          <button
+            onClick={handleLaunchApp}
+            className="px-6 py-3 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full font-semibold hover:shadow-lg hover:shadow-purple-500/50 transition-all duration-300 flex items-center gap-2 hover:scale-105"
+          >
+            Launch App <ArrowRight className="w-4 h-4" />
+          </button>
+        </div>
+      </header>
+
+      {/* Hero Section */}
+      <section className="pt-32 pb-20 px-6">
+        <div className="max-w-7xl mx-auto text-center">
+          <div className="inline-block mb-6 px-4 py-2 bg-purple-500/20 rounded-full border border-purple-500/30">
+            <span className="text-purple-300 text-sm font-medium">🚀 Your All-in-One Academic & Developer Assistant</span>
+          </div>
+          
+          <h1 className="text-6xl md:text-7xl font-bold mb-6 leading-tight">
+            <span className="bg-gradient-to-r from-blue-400 via-purple-400 to-pink-400 bg-clip-text text-transparent">
+              Smarter Research.
+            </span>
+            <br />
+            <span className="bg-gradient-to-r from-pink-400 via-purple-400 to-blue-400 bg-clip-text text-transparent">
+              Better Code.
+            </span>
+            <br />
+            <span className="bg-gradient-to-r from-blue-400 via-cyan-400 to-purple-400 bg-clip-text text-transparent">
+              Faster Learning.
+            </span>
+          </h1>
+          
+          <p className="text-xl text-gray-300 mb-12 max-w-3xl mx-auto leading-relaxed">
+            AcaWise is a smart, AI-powered platform designed to help students, researchers, and developers work smarter. 
+            Generate research papers, analyze code, and get instant academic help — all in one place.
+          </p>
+
+          <div className="flex flex-col sm:flex-row gap-4 justify-center items-center mb-8">
+            <button
+              onClick={handleLaunchApp}
+              className="px-8 py-4 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full font-bold text-lg hover:shadow-2xl hover:shadow-purple-500/50 transition-all duration-300 hover:scale-105 flex items-center gap-2"
+            >
+              Get Started Free <ArrowRight className="w-5 h-5" />
+            </button>
+          </div>
+
+          <div className="flex flex-wrap gap-6 justify-center text-sm text-gray-400">
+            <div className="flex items-center gap-2">
+              <CheckCircle className="w-5 h-5 text-green-400" />
+              <span>No Credit Card Required</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <CheckCircle className="w-5 h-5 text-green-400" />
+              <span>Instant Access</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <CheckCircle className="w-5 h-5 text-green-400" />
+              <span>Free Forever</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Features Grid */}
+      <section className="py-20 px-6">
+        <div className="max-w-7xl mx-auto">
+          <div className="text-center mb-16">
+            <h2 className="text-4xl md:text-5xl font-bold mb-4">
+              Everything You Need to Excel
+            </h2>
+            <p className="text-xl text-gray-400">
+              Powerful features designed for students, researchers, and developers
+            </p>
+          </div>
+
+          <div className="grid md:grid-cols-2 gap-8">
+            {features.map((feature, index) => (
+              <div
+                key={index}
+                className="group bg-white/5 backdrop-blur-lg rounded-2xl p-8 border border-white/10 hover:border-white/20 transition-all duration-300 hover:shadow-2xl hover:shadow-purple-500/20 hover:-translate-y-2"
+              >
+                <div className={`w-16 h-16 bg-gradient-to-br ${feature.color} rounded-xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300`}>
+                  {feature.icon}
+                </div>
+                
+                <h3 className="text-2xl font-bold mb-3">{feature.title}</h3>
+                <p className="text-gray-400 mb-6 leading-relaxed">{feature.description}</p>
+                
+                <ul className="space-y-3">
+                  {feature.highlights.map((highlight, idx) => (
+                    <li key={idx} className="flex items-start gap-3">
+                      <div className="mt-1">
+                        <div className={`w-1.5 h-1.5 rounded-full bg-gradient-to-br ${feature.color}`}></div>
+                      </div>
+                      <span className="text-gray-300">{highlight}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Benefits Section */}
+      <section className="py-20 px-6 bg-black/20">
+        <div className="max-w-7xl mx-auto">
+          <div className="text-center mb-16">
+            <h2 className="text-4xl md:text-5xl font-bold mb-4">
+              Why Choose AcaWise?
+            </h2>
+            <p className="text-xl text-gray-400">
+              Save time, improve skills, and focus on what truly matters
+            </p>
+          </div>
+
+          <div className="grid md:grid-cols-3 gap-8">
+            <div className="text-center p-8 bg-white/5 rounded-2xl border border-white/10 hover:border-white/20 transition-all">
+              <div className="text-5xl mb-4">⚡</div>
+              <h3 className="text-xl font-bold mb-3">Lightning Fast</h3>
+              <p className="text-gray-400">Generate research papers and analyze code in seconds, not hours</p>
+            </div>
+
+            <div className="text-center p-8 bg-white/5 rounded-2xl border border-white/10 hover:border-white/20 transition-all">
+              <div className="text-5xl mb-4">🎯</div>
+              <h3 className="text-xl font-bold mb-3">All-in-One Platform</h3>
+              <p className="text-gray-400">No more switching between tools. Everything you need in one place</p>
+            </div>
+
+            <div className="text-center p-8 bg-white/5 rounded-2xl border border-white/10 hover:border-white/20 transition-all">
+              <div className="text-5xl mb-4">🚀</div>
+              <h3 className="text-xl font-bold mb-3">Skill Enhancement</h3>
+              <p className="text-gray-400">Learn and improve with AI-powered suggestions and feedback</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* CTA Section */}
+      <section className="py-20 px-6">
+        <div className="max-w-4xl mx-auto text-center">
+          <div className="bg-gradient-to-r from-blue-600 to-purple-600 rounded-3xl p-12 shadow-2xl shadow-purple-500/30">
+            <h2 className="text-4xl md:text-5xl font-bold mb-6">
+              Ready to Transform Your Workflow?
+            </h2>
+            <p className="text-xl mb-8 text-blue-100">
+              Join students, researchers, and developers who are already working smarter with AcaWise
+            </p>
+            <button
+              onClick={handleLaunchApp}
+              className="px-10 py-5 bg-white text-purple-600 rounded-full font-bold text-lg hover:shadow-2xl transition-all duration-300 hover:scale-105 inline-flex items-center gap-3"
+            >
+              Launch AcaWise Now <ArrowRight className="w-6 h-6" />
+            </button>
+          </div>
+        </div>
+      </section>
+
+      {/* Footer */}
+      <footer className="py-12 px-6 border-t border-white/10">
+        <div className="max-w-7xl mx-auto text-center">
+          <div className="flex items-center justify-center gap-3 mb-4">
+            <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg flex items-center justify-center">
+              <Sparkles className="w-5 h-5" />
+            </div>
+            <span className="text-xl font-bold">AcaWise</span>
+          </div>
+          <p className="text-gray-400">
+            Making research, coding, and learning effortless
+          </p>
+          <p className="text-gray-500 text-sm mt-4">
+            © 2024 AcaWise. All rights reserved.
+          </p>
+        </div>
+      </footer>
+    </div>
+  );
+} -->
