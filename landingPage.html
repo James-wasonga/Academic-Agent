@@ -1,4 +1,660 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AcaWise - Smarter Research. Better Code. Faster Learning.</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
 
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: #0a0a0a;
+            color: white;
+            overflow-x: hidden;
+        }
+
+        /* Header */
+        header {
+            position: fixed;
+            top: 0;
+            width: 100%;
+            background: rgba(10, 10, 10, 0.95);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            z-index: 1000;
+            padding: 1.2rem 3rem;
+        }
+
+        .header-content {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+        }
+
+        .logo-icon {
+            font-size: 2rem;
+        }
+
+        .logo-text {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: white;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 3rem;
+            align-items: center;
+        }
+
+        .nav-links a {
+            color: #999;
+            text-decoration: none;
+            font-size: 0.95rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            transition: color 0.3s;
+        }
+
+        .nav-links a:hover,
+        .nav-links a.active {
+            color: #ff1b8d;
+        }
+
+        .launch-btn {
+            padding: 0.8rem 2rem;
+            background: transparent;
+            border: 2px solid #ff1b8d;
+            border-radius: 50px;
+            color: #ff1b8d;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-size: 0.9rem;
+        }
+
+        .launch-btn:hover {
+            background: #ff1b8d;
+            color: white;
+            transform: scale(1.05);
+        }
+
+        /* Hero Section */
+        .hero {
+            position: relative;
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            overflow: hidden;
+            background: linear-gradient(135deg, #0a0a0a 0%, #1a1a2e 50%, #0a0a0a 100%);
+        }
+
+        .hero::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: radial-gradient(circle at 50% 50%, rgba(255, 27, 141, 0.1) 0%, transparent 70%);
+        }
+
+        .hero-content {
+            position: relative;
+            z-index: 2;
+            max-width: 1000px;
+            padding: 2rem;
+        }
+
+        .hero-label {
+            display: inline-block;
+            padding: 0.5rem 0;
+            color: #ff1b8d;
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 3px;
+            margin-bottom: 1rem;
+            position: relative;
+        }
+
+        .hero-label::before,
+        .hero-label::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            width: 80px;
+            height: 1px;
+            background: #ff1b8d;
+        }
+
+        .hero-label::before {
+            left: -100px;
+        }
+
+        .hero-label::after {
+            right: -100px;
+        }
+
+        .hero h1 {
+            font-size: 4.5rem;
+            line-height: 1.2;
+            margin-bottom: 2rem;
+            font-weight: 700;
+            letter-spacing: -2px;
+        }
+
+        .hero h1 span {
+            display: block;
+        }
+
+        .hero-subtitle {
+            font-size: 1.2rem;
+            color: #999;
+            margin-bottom: 3rem;
+            line-height: 1.8;
+            max-width: 700px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .hero-btn {
+            padding: 1rem 3rem;
+            background: transparent;
+            border: 2px solid #ff1b8d;
+            border-radius: 50px;
+            color: #ff1b8d;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            font-size: 1rem;
+        }
+
+        .hero-btn:hover {
+            background: #ff1b8d;
+            color: white;
+            transform: translateY(-3px);
+            box-shadow: 0 10px 30px rgba(255, 27, 141, 0.3);
+        }
+
+        /* Section Styling */
+        .section {
+            padding: 120px 3rem;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .section-dark {
+            background: #0a0a0a;
+        }
+
+        .section-header {
+            text-align: center;
+            margin-bottom: 5rem;
+        }
+
+        .section-label {
+            color: #ff1b8d;
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 3px;
+            margin-bottom: 1rem;
+        }
+
+        .section-title {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            font-weight: 700;
+            letter-spacing: -1px;
+        }
+
+        .section-subtitle {
+            font-size: 1.1rem;
+            color: #999;
+        }
+
+        /* Features Grid */
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 3rem;
+            margin-bottom: 100px;
+        }
+
+        .feature-card {
+            background: #111;
+            padding: 3rem;
+            border-radius: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .feature-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, #ff1b8d, #ff1b8d);
+            transform: scaleX(0);
+            transition: transform 0.3s ease;
+        }
+
+        .feature-card:hover::before {
+            transform: scaleX(1);
+        }
+
+        .feature-card:hover {
+            border-color: rgba(255, 27, 141, 0.3);
+            transform: translateY(-5px);
+        }
+
+        .feature-icon {
+            font-size: 3rem;
+            margin-bottom: 1.5rem;
+            display: block;
+        }
+
+        .feature-card h3 {
+            font-size: 1.8rem;
+            margin-bottom: 1rem;
+            font-weight: 600;
+        }
+
+        .feature-card p {
+            color: #999;
+            margin-bottom: 2rem;
+            line-height: 1.8;
+        }
+
+        .feature-list {
+            list-style: none;
+        }
+
+        .feature-list li {
+            padding: 0.5rem 0;
+            color: #ccc;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .feature-list li::before {
+            content: '→';
+            color: #ff1b8d;
+            font-weight: bold;
+        }
+
+        /* Benefits Section */
+        .benefits-section {
+            background: #111;
+            padding: 100px 3rem;
+        }
+
+        .benefits-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 3rem;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .benefit-card {
+            text-align: center;
+            padding: 2rem;
+        }
+
+        .benefit-icon {
+            width: 80px;
+            height: 80px;
+            margin: 0 auto 2rem;
+            background: rgba(255, 27, 141, 0.1);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+        }
+
+        .benefit-card h3 {
+            font-size: 1.3rem;
+            margin-bottom: 1rem;
+            font-weight: 600;
+        }
+
+        .benefit-card p {
+            color: #999;
+            line-height: 1.8;
+        }
+
+        /* CTA Section */
+        .cta-section {
+            padding: 150px 3rem;
+            text-align: center;
+            background: linear-gradient(135deg, #1a1a2e 0%, #0a0a0a 100%);
+            position: relative;
+        }
+
+        .cta-section::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: radial-gradient(circle at 50% 50%, rgba(255, 27, 141, 0.15) 0%, transparent 70%);
+        }
+
+        .cta-content {
+            position: relative;
+            z-index: 2;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .cta-section h2 {
+            font-size: 3.5rem;
+            margin-bottom: 1.5rem;
+            font-weight: 700;
+            letter-spacing: -1px;
+        }
+
+        .cta-section p {
+            font-size: 1.2rem;
+            color: #999;
+            margin-bottom: 3rem;
+        }
+
+        .cta-btn {
+            padding: 1.2rem 3.5rem;
+            background: #ff1b8d;
+            border: none;
+            border-radius: 50px;
+            color: white;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            font-size: 1rem;
+        }
+
+        .cta-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 15px 40px rgba(255, 27, 141, 0.4);
+        }
+
+        /* Footer */
+        footer {
+            padding: 3rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.05);
+            text-align: center;
+            background: #0a0a0a;
+        }
+
+        .footer-logo {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.8rem;
+            margin-bottom: 1rem;
+        }
+
+        .footer-logo-icon {
+            font-size: 1.5rem;
+        }
+
+        .footer-logo-text {
+            font-size: 1.3rem;
+            font-weight: 600;
+        }
+
+        footer p {
+            color: #666;
+            margin-top: 1rem;
+        }
+
+        /* Responsive */
+        @media (max-width: 1024px) {
+            .features-grid,
+            .benefits-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .hero h1 {
+                font-size: 3rem;
+            }
+
+            .section-title {
+                font-size: 2.5rem;
+            }
+        }
+
+        @media (max-width: 768px) {
+            header {
+                padding: 1rem 1.5rem;
+            }
+
+            .nav-links {
+                display: none;
+            }
+
+            .hero h1 {
+                font-size: 2rem;
+            }
+
+            .hero-label::before,
+            .hero-label::after {
+                width: 40px;
+                left: -50px;
+            }
+
+            .hero-label::after {
+                right: -50px;
+            }
+
+            .section {
+                padding: 80px 1.5rem;
+            }
+
+            .section-title {
+                font-size: 2rem;
+            }
+
+            .cta-section h2 {
+                font-size: 2rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header>
+        <div class="header-content">
+            <div class="logo">
+                <span class="logo-icon">📚</span>
+                <span class="logo-text">AcaWise</span>
+            </div>
+            <nav class="nav-links">
+                <a href="#" class="active">HOME</a>
+                <a href="#features">FEATURES</a>
+                <a href="#benefits">BENEFITS</a>
+            </nav>
+            <button class="launch-btn" onclick="launchApp()">Launch App</button>
+        </div>
+    </header>
+
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="hero-content">
+            <div class="hero-label">AI-POWERED PLATFORM</div>
+            <h1>
+                <span>SMARTER RESEARCH.</span>
+                <span>BETTER CODE.</span>
+                <span>FASTER LEARNING.</span>
+            </h1>
+            <p class="hero-subtitle">
+                Your all-in-one academic and developer assistant. Generate research papers, analyze code quality, 
+                and get instant academic help — all powered by AI.
+            </p>
+            <button class="hero-btn" onclick="launchApp()">Launch App</button>
+        </div>
+    </section>
+
+    <!-- Features Section -->
+    <section class="section section-dark" id="features">
+        <div class="section-header">
+            <div class="section-label">- POWERFUL FEATURES -</div>
+            <h2 class="section-title">Everything You Need to Excel</h2>
+            <p class="section-subtitle">Designed for students, researchers, and developers</p>
+        </div>
+
+        <div class="features-grid">
+            <!-- Research Assistant -->
+            <div class="feature-card">
+                <span class="feature-icon">📝</span>
+                <h3>Research Assistant</h3>
+                <p>Generate well-structured academic research papers in seconds. Get organized, refined notes on any topic with AI-powered assistance.</p>
+                <ul class="feature-list">
+                    <li>Structured academic research</li>
+                    <li>Save as TXT for later use</li>
+                    <li>Export as PDF for easy reading</li>
+                    <li>Markdown support included</li>
+                </ul>
+            </div>
+
+            <!-- Code Grading -->
+            <div class="feature-card">
+                <span class="feature-icon">💻</span>
+                <h3>Code Grading & Feedback</h3>
+                <p>Instantly analyze your code without repeatedly asking "where's the error?" Get automatic, intelligent feedback on your work.</p>
+                <ul class="feature-list">
+                    <li>Syntax error detection 🪲</li>
+                    <li>Code quality analysis 👨‍💻</li>
+                    <li>Improvement suggestions ✨</li>
+                    <li>Strength evaluation 💪</li>
+                </ul>
+            </div>
+
+            <!-- Student Q&A -->
+            <div class="feature-card">
+                <span class="feature-icon">💬</span>
+                <h3>Student Q&A</h3>
+                <p>Ask academic questions and get instant AI-powered answers with personalized learning recommendations tailored to your needs.</p>
+                <ul class="feature-list">
+                    <li>Instant accurate answers</li>
+                    <li>Comprehensive coding help</li>
+                    <li>Personalized recommendations</li>
+                    <li>Coming Soon! 🚀</li>
+                </ul>
+            </div>
+
+            <!-- Dashboard -->
+            <div class="feature-card">
+                <span class="feature-icon">📊</span>
+                <h3>Dashboard & Tracking</h3>
+                <p>Keep track of all your activities and progress. Your data stays safe locally, persisting even after refreshing your browser.</p>
+                <ul class="feature-list">
+                    <li>Comprehensive activity tracking</li>
+                    <li>Secure local browser storage</li>
+                    <li>Persistent across sessions</li>
+                    <li>Reset statistics anytime</li>
+                </ul>
+            </div>
+        </div>
+    </section>
+
+    <!-- Benefits Section -->
+    <section class="benefits-section" id="benefits">
+        <div class="section-header">
+            <div class="section-label">- WHY ACAWISE -</div>
+            <h2 class="section-title">Why Students & Developers Love AcaWise</h2>
+        </div>
+
+        <div class="benefits-grid">
+            <div class="benefit-card">
+                <div class="benefit-icon">⚡</div>
+                <h3>Lightning Fast</h3>
+                <p>Generate research papers and analyze code in seconds, not hours. Save valuable time for what really matters.</p>
+            </div>
+
+            <div class="benefit-card">
+                <div class="benefit-icon">🎯</div>
+                <h3>All-in-One Platform</h3>
+                <p>No more switching between multiple tools. Everything you need for academic and coding success in one place.</p>
+            </div>
+
+            <div class="benefit-card">
+                <div class="benefit-icon">🚀</div>
+                <h3>Skill Enhancement</h3>
+                <p>Learn and improve continuously with AI-powered suggestions, feedback, and personalized recommendations.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- CTA Section -->
+    <section class="cta-section">
+        <div class="cta-content">
+            <h2>Ready to Transform Your Workflow?</h2>
+            <p>Join students, researchers, and developers who are already working smarter with AcaWise. Start for free today.</p>
+            <button class="cta-btn" onclick="launchApp()">Launch AcaWise Now</button>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer>
+        <div class="footer-logo">
+            <span class="footer-logo-icon">📚</span>
+            <span class="footer-logo-text">AcaWise</span>
+        </div>
+        <p>Making research, coding, and learning effortless</p>
+        <p>© 2024 AcaWise. All rights reserved.</p>
+    </footer>
+
+    <script>
+        function launchApp() {
+            // Replace this URL with your actual app URL
+            const appUrl = 'https://your-acawise-app-url.com';
+            window.open(appUrl, '_blank');
+        }
+
+        // Smooth scrolling for navigation
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+                }
+            });
+        });
+    </script>
+</body>
+</html>
 <!-- import React, { useState } from 'react';
 import { BookOpen, Code, MessageSquare, BarChart3, Download, CheckCircle, Sparkles, ArrowRight } from 'lucide-react';
 
