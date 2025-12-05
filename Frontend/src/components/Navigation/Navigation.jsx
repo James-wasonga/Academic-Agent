@@ -80,9 +80,9 @@ const Navigation = ({ activeTab, setActiveTab }) => {
   // 🆕 UPDATED: Added 'history' tab with History icon
   const tabs = [
     { id: 'research', label: 'Research Assistant', icon: Search },
-    { id: 'history', label: 'History', icon: History, showBadge: true }, // 🆕 NEW TAB
     { id: 'grading', label: 'Code Grading', icon: Code },
-    { id: 'chat', label: 'Student Q&A', icon: MessageCircle }
+    { id: 'chat', label: 'Student Q&A', icon: MessageCircle },
+    { id: 'history', label: 'History', icon: History, showBadge: true } // 🆕 NEW TAB
   ];
 
   return (
