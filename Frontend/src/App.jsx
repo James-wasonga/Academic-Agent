@@ -7,6 +7,7 @@ import Grading from './components/Grading/Grading';
 import StudentChat from './components/Chat/StudentChat';
 import { AppProvider } from './context/AppContext';
 import { ChevronDown, ChevronUp } from 'lucide-react';
+import ResearchHistory from './components/Research/ResearchHistory';
 import './App.css';
 
 const AppContent = () => {
@@ -17,6 +18,8 @@ const AppContent = () => {
     switch (activeTab) {
       case 'research':
         return <Research />;
+      case 'history':  // 🆕 NEW CASE
+        return <ResearchHistory />;  
       case 'grading':
         return <Grading />;
       case 'chat':
