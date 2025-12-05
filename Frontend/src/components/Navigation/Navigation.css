@@ -1,3 +1,9 @@
+
+
+
+
+/* Navigation.css - Fixed for mobile responsiveness */
+
 /* Desktop - show full labels with icons */
 .nav-label {
   display: inline;
@@ -7,56 +13,106 @@
   display: inline-block;
 }
 
-/* Mobile styles - Icons only, hide text labels */
+/* Tablet and below - adjust layout */
+@media (max-width: 1024px) {
+  .nav-tabs {
+    gap: 1rem !important;
+  }
+
+  .nav-tabs button {
+    font-size: 0.875rem;
+    padding: 0.75rem 1rem !important;
+  }
+}
+
+/* Mobile styles - Stack text below icons or wrap text */
 @media (max-width: 768px) {
   .nav-tabs {
-    justify-content: space-around;
-    gap: 0 !important;
+    justify-content: flex-start;
+    gap: 0.5rem !important;
     padding: 0;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none; /* Firefox */
+  }
+
+  .nav-tabs::-webkit-scrollbar {
+    display: none; /* Chrome, Safari */
   }
 
   .nav-tabs button {
-    flex: 1;
-    padding: 0.75rem 0.5rem !important;
-    white-space: nowrap;
-    min-width: 0;
-    justify-content: center;
-    gap: 0 !important;
+    flex-direction: column;
+    padding: 0.5rem 0.75rem !important;
+    min-width: auto;
+    gap: 0.25rem !important;
+    font-size: 0.75rem;
+    white-space: normal;
+    text-align: center;
   }
 
-  /* Hide text labels on mobile, show only icons */
+  /* Show text labels, but allow wrapping */
   .nav-label {
-    display: none;
+    display: block;
+    max-width: 70px;
+    word-wrap: break-word;
+    line-height: 1.2;
   }
 
   .nav-icon {
-    display: inline-block;
-    width: 1.5rem !important;
-    height: 1.5rem !important;
-  }
-}
-
-@media (max-width: 480px) {
-  .nav-tabs {
-    padding: 0;
-    justify-content: space-around;
-  }
-
-  .nav-tabs button {
-    font-size: 0.75rem !important;
-    padding: 0.75rem 0.5rem !important;
-  }
-
-  .nav-icon {
+    display: block;
     width: 1.25rem !important;
     height: 1.25rem !important;
+    margin: 0 auto;
+  }
+
+  /* Badge positioning for mobile */
+  .nav-tabs button {
+    position: relative;
+  }
+
+  .nav-tabs button .absolute {
+    top: 0.25rem;
+    right: 0.25rem;
   }
 }
 
-/* Very small phones */
+/* Small mobile - even more compact */
+@media (max-width: 480px) {
+  .nav-tabs button {
+    padding: 0.5rem 0.5rem !important;
+    font-size: 0.7rem;
+  }
+
+  .nav-label {
+    max-width: 60px;
+    font-size: 0.65rem;
+  }
+
+  .nav-icon {
+    width: 1.1rem !important;
+    height: 1.1rem !important;
+  }
+
+  /* Make badge smaller on mobile */
+  .nav-tabs button .absolute {
+    height: 1rem;
+    width: 1rem;
+    font-size: 0.6rem;
+    top: 0.15rem;
+    right: 0.15rem;
+  }
+}
+
+/* Very small phones - ultra compact */
 @media (max-width: 380px) {
   .nav-tabs button {
-    padding: 0.75rem 0.25rem !important;
+    padding: 0.4rem 0.4rem !important;
+    font-size: 0.65rem;
+  }
+
+  .nav-label {
+    max-width: 50px;
+    font-size: 0.6rem;
   }
 
   .nav-icon {
