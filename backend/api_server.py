@@ -1575,7 +1575,7 @@ def _extract_key_findings(text: str) -> str:
     return "Key insights derived from comprehensive analysis of the topic."
 
 def _extract_conclusions(text: str) -> str:
-    conclusion_patterns = [
+    conclusion_patterns = [ 
         r"(?:conclusion|summary|in conclusion|to conclude|recommendations)[\s\S]*$",
         r"(?:therefore|thus|in summary|overall)[\s\S]*$"
     ]
