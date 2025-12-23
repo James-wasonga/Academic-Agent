@@ -1505,7 +1505,8 @@ print(f"Gemini Key: {'Available' if HAS_GEMINI else 'Missing'}")
 
 # -------------------- IMPORT ROUTERS --------------------
 from api.grading import router as grading_router
-from api.chat import router as chat_router   # ✅ Added Chat Router Import
+from api.chat import router as chat_router
+from api.ratings import router as ratings_router  # 🆕 NEW: Import ratings router
 
 # -------------------- FORMATTING HELPERS --------------------
 def format_research_output(raw_text: str, query: str) -> str:
@@ -1595,12 +1596,11 @@ def gemini_research(query: str) -> dict:
         import google.generativeai as genai
         genai.configure(api_key=GEMINI_KEY)
 
-        # ✅ Use NEW model names that actually exist
         model_names = [
-            "gemini-2.0-flash",           # Fast and efficient
-            "gemini-2.5-flash",           # Latest flash model
-            "gemini-2.5-pro",             # Most capable
-            "gemini-flash-latest",        # Always points to latest flash
+            "gemini-2.0-flash",
+            "gemini-2.5-flash",
+            "gemini-2.5-pro",
+            "gemini-flash-latest",
         ]
 
         model = None
@@ -1610,17 +1610,13 @@ def gemini_research(query: str) -> dict:
             try:
                 print(f"🔄 Trying model: {model_name}")
                 test_model = genai.GenerativeModel(model_name)
-                
-                # Quick test
                 test_response = test_model.generate_content(
                     "Test",
                     generation_config={"max_output_tokens": 10}
                 )
-                
                 print(f"✅ Model {model_name} works!")
                 model = test_model
                 break
-                
             except Exception as e:
                 print(f"❌ Model {model_name} failed: {str(e)}")
                 last_error = e
@@ -1629,7 +1625,6 @@ def gemini_research(query: str) -> dict:
         if model is None:
             raise Exception(f"All models failed. Last error: {last_error}")
 
-        # Generate actual research
         prompt = f"""
         Provide a professional, structured research analysis on: "{query}".
         Include executive summary, detailed analysis, key findings, practical applications, and conclusions.
@@ -1651,7 +1646,7 @@ def gemini_research(query: str) -> dict:
             "topic": query,
             "summary": formatted_summary,
             "sources": "Comprehensive academic research and verified references",
-            "tool_used": ["AI-powered research system", model_name],  # Include which model was used
+            "tool_used": ["AI-powered research system", model_name],
             "timestamp": datetime.now().isoformat(),
             "id": f"research_{datetime.now().timestamp()}",
             "mode": "real_ai",
@@ -1698,7 +1693,8 @@ app.add_middleware(
 
 # ✅ Mount routers
 app.include_router(grading_router)
-app.include_router(chat_router)  # ✅ Added Chat Router Mount
+app.include_router(chat_router)
+app.include_router(ratings_router)  # 🆕 NEW: Mount ratings router
 
 # -------------------- ROUTES --------------------
 class ResearchRequest(BaseModel):
@@ -1726,11 +1722,33 @@ async def health_check():
     return {
         "status": "healthy",
         "mode": "real_ai" if HAS_GEMINI else "fallback",
-        "gemini_key": HAS_GEMINI
+        "gemini_key": HAS_GEMINI,
+        "endpoints": {
+            "research": "/api/research",
+            "grading": "/api/grading",
+            "chat": "/api/chat",
+            "ratings": "/api/ratings",  # 🆕 NEW
+        }
+    }
+
+@app.get("/")
+async def root():
+    return {
+        "message": "Academic Research Agent API v2.0",
+        "status": "online",
+        "endpoints": {
+            "docs": "/docs",
+            "health": "/health",
+            "research": "/api/research",
+            "grading": "/api/grading",
+            "chat": "/api/chat",
+            "ratings": "/api/ratings",  # 🆕 NEW
+        }
     }
 
 # -------------------- RUN SERVER --------------------
 if __name__ == "__main__":
     print("🚀 Starting Academic Research Agent API v2.0...")
     print(f"🔑 Gemini AI: {'Enabled' if HAS_GEMINI else 'Disabled'}")
+    print(f"📊 Ratings System: Enabled")  # 🆕 NEW
     uvicorn.run(app, host="0.0.0.0", port=PORT, reload=False)
