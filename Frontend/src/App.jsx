@@ -77,6 +77,7 @@ import Grading from './components/Grading/Grading';
 import StudentChat from './components/Chat/StudentChat';
 import ResearchHistory from './components/Research/ResearchHistory';
 import RatingModal from './components/RatingModal/RatingModal';
+import AdminRatings from './components/admin/AdminRatings';
 import { AppProvider } from './context/AppContext';
 import { ChevronDown, ChevronUp } from 'lucide-react';
 import './App.css';
@@ -295,6 +296,8 @@ const AppContent = () => {
         return <Grading />;
       case 'chat':
         return <StudentChat />;
+      case 'adming':
+        return <AdminRatings />;
       default:
         return <Research />;
     }
