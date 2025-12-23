@@ -10,6 +10,7 @@ const RatingModal = ({ isOpen, onClose, onSubmit }) => {
   const [selectedCategory, setSelectedCategory] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showThankYou, setShowThankYou] = useState(false);
+  const [error, setError] = useState(null);
 
   const categories = [
     { id: 'easy', label: 'Easy to use', icon: '👍' },
@@ -19,6 +20,13 @@ const RatingModal = ({ isOpen, onClose, onSubmit }) => {
     { id: 'design', label: 'Great design', icon: '🎨' }
   ];
 
+  // 🆕 Detect device type
+  const getDeviceType = () => {
+    return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) 
+      ? 'mobile' 
+      : 'desktop';
+  };
+
   const handleSubmit = async () => {
     if (rating === 0) {
       alert('Please select a rating before submitting');
@@ -26,27 +34,42 @@ const RatingModal = ({ isOpen, onClose, onSubmit }) => {
     }
 
     setIsSubmitting(true);
+    setError(null);
 
-    // Save rating to localStorage
+    // Prepare rating data
     const ratingData = {
       rating,
-      feedback,
+      feedback: feedback.trim(),
       category: selectedCategory,
       timestamp: new Date().toISOString(),
-      id: `rating_${Date.now()}`
+      id: `rating_${Date.now()}`,
+      user_agent: navigator.userAgent,
+      device_type: getDeviceType()
     };
 
     try {
-      // Get existing ratings
+      // 🆕 STEP 1: Save to localStorage (backup)
       const existingRatings = localStorage.getItem('appRatings');
       const ratings = existingRatings ? JSON.parse(existingRatings) : [];
-      
-      // Add new rating
       ratings.push(ratingData);
-      
-      // Save back to localStorage
       localStorage.setItem('appRatings', JSON.stringify(ratings));
-      
+
+      // 🆕 STEP 2: Send to backend API
+      const response = await fetch('http://localhost:8000/api/ratings/submit', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(ratingData),
+      });
+
+      if (!response.ok) {
+        throw new Error(`Server error: ${response.status}`);
+      }
+
+      const result = await response.json();
+      console.log('✅ Rating sent to server:', result);
+
       // Show thank you message
       setShowThankYou(true);
       
@@ -59,8 +82,24 @@ const RatingModal = ({ isOpen, onClose, onSubmit }) => {
       setTimeout(() => {
         handleClose();
       }, 2000);
+
     } catch (error) {
-      console.error('Error saving rating:', error);
+      console.error('❌ Error sending rating:', error);
+      
+      // Show error but still save locally
+      setError('Saved locally, but could not send to server. Your feedback is still recorded!');
+      
+      // Still show thank you after error
+      setTimeout(() => {
+        setShowThankYou(true);
+        if (onSubmit) {
+          onSubmit(ratingData);
+        }
+        setTimeout(() => {
+          handleClose();
+        }, 2000);
+      }, 1500);
+      
     } finally {
       setIsSubmitting(false);
     }
@@ -72,6 +111,7 @@ const RatingModal = ({ isOpen, onClose, onSubmit }) => {
     setFeedback('');
     setSelectedCategory('');
     setShowThankYou(false);
+    setError(null);
     onClose();
   };
 
@@ -82,6 +122,23 @@ const RatingModal = ({ isOpen, onClose, onSubmit }) => {
       timestamp: new Date().toISOString()
     };
     localStorage.setItem('lastRatingSkip', JSON.stringify(skipData));
+    
+    // 🆕 Optionally send skip event to backend
+    fetch('http://localhost:8000/api/ratings/submit', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        rating: 0,
+        feedback: 'User skipped',
+        category: 'skipped',
+        timestamp: new Date().toISOString(),
+        user_agent: navigator.userAgent,
+        device_type: getDeviceType()
+      }),
+    }).catch(err => console.log('Skip not sent to server:', err));
+    
     handleClose();
   };
 
@@ -180,6 +237,21 @@ const RatingModal = ({ isOpen, onClose, onSubmit }) => {
               </div>
             )}
 
+            {/* Error Message */}
+            {error && (
+              <div style={{
+                padding: '0.75rem',
+                background: '#fef3c7',
+                border: '1px solid #fbbf24',
+                borderRadius: '0.5rem',
+                fontSize: '0.875rem',
+                color: '#92400e',
+                marginBottom: '1rem'
+              }}>
+                ⚠️ {error}
+              </div>
+            )}
+
             {/* Action Buttons */}
             <div className="rating-modal-actions">
               <button
@@ -196,7 +268,7 @@ const RatingModal = ({ isOpen, onClose, onSubmit }) => {
                 {isSubmitting ? (
                   <>
                     <div className="spinner-small"></div>
-                    Submitting...
+                    Sending...
                   </>
                 ) : (
                   <>
@@ -212,7 +284,7 @@ const RatingModal = ({ isOpen, onClose, onSubmit }) => {
           <div className="thank-you-message">
             <div className="thank-you-icon">✨</div>
             <h2>Thank You!</h2>
-            <p>Your feedback helps us improve AcaWise</p>
+            <p>Your feedback has been sent successfully!</p>
             <div className="thank-you-stars">
               {[...Array(rating)].map((_, i) => (
                 <Star key={i} className="thank-you-star" />
