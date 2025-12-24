@@ -296,7 +296,7 @@ const AppContent = () => {
         return <Grading />;
       case 'chat':
         return <StudentChat />;
-      case 'adming':
+      case 'admin':
         return <AdminRatings />;
       default:
         return <Research />;
