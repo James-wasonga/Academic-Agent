@@ -36,7 +36,7 @@
 // export default Navigation;
 
 import React, { useEffect, useState } from 'react';
-import { Search, Code, MessageCircle, History } from 'lucide-react'; // 🆕 ADDED: History icon
+import { Search, Code, MessageCircle, History, Shield } from 'lucide-react'; // 🆕 ADDED: History icon
 import './Navigation.css';
 
 const Navigation = ({ activeTab, setActiveTab }) => {
@@ -82,7 +82,8 @@ const Navigation = ({ activeTab, setActiveTab }) => {
     { id: 'research', label: 'Research Assistant', icon: Search },
     { id: 'grading', label: 'Code Grading', icon: Code },
     { id: 'chat', label: 'Student Q&A', icon: MessageCircle },
-    { id: 'history', label: 'Research History', icon: History, showBadge: true } // 🆕 NEW TAB
+    { id: 'history', label: 'Research History', icon: History, showBadge: true }, // 🆕 NEW TAB
+    { id: 'admin', label: 'Admin Panel', icon: Shield}
   ];
 
   return (
