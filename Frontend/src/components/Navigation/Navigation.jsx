@@ -83,7 +83,7 @@ const Navigation = ({ activeTab, setActiveTab }) => {
     { id: 'grading', label: 'Code Grading', icon: Code },
     { id: 'chat', label: 'Student Q&A', icon: MessageCircle },
     { id: 'history', label: 'Research History', icon: History, showBadge: true }, // 🆕 NEW TAB
-    { id: 'admin', label: 'Admin', icon: Shield} //NEW
+    // { id: 'admin', label: 'Admin', icon: Shield} //NEW
   ];
 
   return (
