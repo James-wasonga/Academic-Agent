@@ -50,7 +50,7 @@ AcaWise simplifies research, improves coding practices, and promotes smarter lea
 By combining education and AI, AcaWise attracts students, researchers, and developers, encouraging widespread adoption of AI in learning environments.
 
 #### Continuous Engagement  
-Interactive features like code grading and research generation promote regular user interaction and sustained learning.
+Interactive features like code grading, research generation and inApp chat among peers promote regular user interaction and sustained learning.
 
 ## Educational Innovation
 
