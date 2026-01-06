@@ -398,8 +398,8 @@ const StudentChat = () => {
               <div className="login-icon">
                 <UserPlus className="w-8 h-8" />
               </div>
-              <h2 className="login-title">Welcome to Student Chat! 👋</h2>
-              <p className="login-subtitle">Enter your name to start chatting with classmates</p>
+              <h2 className="login-title">Welcome to Peers Chat! 👋</h2>
+              <p className="login-subtitle">Enter your name to start chatting with peers</p>
             </div>
 
             <div className="login-form">
