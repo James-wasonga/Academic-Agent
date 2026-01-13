@@ -2,48 +2,50 @@
 pragma solidity ^0.8.19;
 
 /**
- * @title AcaWise
- * @dev Lightweight Decentralized Academic & Developer Assistant Platform
- * @notice Only critical data stored on-chain, content stored off-chain (IPFS)
+ * @title AcaWise - AI-Enhanced Academic Platform
+ * @dev Integrates with off-chain AI for automated grading and verification
+ * @notice For Mantle Global Hackathon 2025 - AI & Oracles Track
  */
 contract AcaWise {
     
     // STATE VARIABLES
-    
     address public owner;
-    address public aiOracleAddress; //AI Oracle Address
+    address public aiServiceAddress;
     uint256 public totalUsers;
     uint256 public totalResearchPapers;
     uint256 public totalCodeSubmissions;
-    uint256 public totalAIAnalyses;
-
-    // STRUCTS (Minimal on-chain data)
+    uint256 public totalAIVerifications;
     
+    // STRUCTS
     struct User {
         bool isRegistered;
         uint256 registrationDate;
         uint256 researchCount;
         uint256 codeSubmissionCount;
+        uint256 reputationScore;
     }
     
     struct ResearchPaper {
         uint256 id;
         address author;
-        string ipfsHash; // Full content stored on IPFS
+        string ipfsHash;
         uint256 timestamp;
         bool exists;
+        bool aiVerified;
+        uint256 qualityScore;
     }
     
     struct CodeSubmission {
         uint256 id;
         address developer;
-        string ipfsHash; // Code + feedback stored on IPFS
-        uint256 qualityScore; // Only score on-chain
+        string ipfsHash;
+        uint256 qualityScore;
         uint256 timestamp;
         bool exists;
+        bool aiGraded;
+        uint256 aiScore;
     }
     
-
     // MAPPINGS
     mapping(address => User) public users;
     mapping(uint256 => ResearchPaper) public researchPapers;
@@ -51,14 +53,16 @@ contract AcaWise {
     mapping(address => uint256[]) public userResearchIds;
     mapping(address => uint256[]) public userCodeIds;
     
-  
-    // EVENTS (For off-chain indexing)
+    // EVENTS
     event UserRegistered(address indexed user, uint256 timestamp);
-    event ResearchCreated(uint256 indexed id, address indexed author, string ipfsHash, uint256 timestamp);
-    event CodeSubmitted(uint256 indexed id, address indexed developer, string ipfsHash, uint256 score, uint256 timestamp);
+    event ResearchCreated(uint256 indexed id, address indexed author, string ipfsHash);
+    event ResearchVerified(uint256 indexed id, uint256 qualityScore, uint256 timestamp);
+    event CodeSubmitted(uint256 indexed id, address indexed developer, string ipfsHash);
+    event CodeGraded(uint256 indexed id, uint256 aiScore, uint256 timestamp);
+    event ReputationUpdated(address indexed user, uint256 newScore);
+    event AIServiceUpdated(address indexed newService);
     
- 
-    // MODIFIERS 
+    // MODIFIERS
     modifier onlyOwner() {
         require(msg.sender == owner, "Only owner");
         _;
@@ -69,19 +73,17 @@ contract AcaWise {
         _;
     }
     
-
-    // CONSTRUCTOR
-
-    constructor() {
-        owner = msg.sender;
+    modifier onlyAIService() {
+        require(msg.sender == aiServiceAddress || msg.sender == owner, "Only AI service");
+        _;
     }
     
-
-    // USER FUNCTIONS
+    constructor() {
+        owner = msg.sender;
+        aiServiceAddress = msg.sender;
+    }
     
-    /**
-     * @dev Register user (free, just marks address as registered)
-     */
+    // USER FUNCTIONS
     function register() external {
         require(!users[msg.sender].isRegistered, "Already registered");
         
@@ -89,27 +91,23 @@ contract AcaWise {
             isRegistered: true,
             registrationDate: block.timestamp,
             researchCount: 0,
-            codeSubmissionCount: 0
+            codeSubmissionCount: 0,
+            reputationScore: 50
         });
         
         totalUsers++;
         emit UserRegistered(msg.sender, block.timestamp);
     }
     
-    /**
-     * @dev Check if user is registered
-     */
     function isRegistered(address _user) external view returns (bool) {
         return users[_user].isRegistered;
     }
     
-
-    // RESEARCH FUNCTIONS
+    function getUserReputation(address _user) external view returns (uint256) {
+        return users[_user].reputationScore;
+    }
     
-    /**
-     * @dev Create research paper (only IPFS hash stored on-chain)
-     * @param _ipfsHash IPFS hash containing: title, content, category, metadata
-     */
+    // RESEARCH FUNCTIONS
     function createResearch(string memory _ipfsHash) external onlyRegistered returns (uint256) {
         require(bytes(_ipfsHash).length > 0, "Invalid IPFS hash");
         
@@ -121,47 +119,53 @@ contract AcaWise {
             author: msg.sender,
             ipfsHash: _ipfsHash,
             timestamp: block.timestamp,
-            exists: true
+            exists: true,
+            aiVerified: false,
+            qualityScore: 0
         });
         
         userResearchIds[msg.sender].push(id);
         users[msg.sender].researchCount++;
         
-        emit ResearchCreated(id, msg.sender, _ipfsHash, block.timestamp);
+        emit ResearchCreated(id, msg.sender, _ipfsHash);
         return id;
     }
     
-    /**
-     * @dev Get research paper by ID
-     */
+    function verifyResearch(uint256 _id, uint256 _qualityScore) external onlyAIService {
+        require(researchPapers[_id].exists, "Research not found");
+        require(_qualityScore <= 100, "Invalid score");
+        require(!researchPapers[_id].aiVerified, "Already verified");
+        
+        ResearchPaper storage paper = researchPapers[_id];
+        paper.aiVerified = true;
+        paper.qualityScore = _qualityScore;
+        
+        totalAIVerifications++;
+        _updateReputation(paper.author, _qualityScore);
+        
+        emit ResearchVerified(_id, _qualityScore, block.timestamp);
+    }
+    
     function getResearch(uint256 _id) external view returns (
         address author,
         string memory ipfsHash,
-        uint256 timestamp
+        uint256 timestamp,
+        bool aiVerified,
+        uint256 qualityScore
     ) {
         require(researchPapers[_id].exists, "Research not found");
         ResearchPaper memory paper = researchPapers[_id];
-        return (paper.author, paper.ipfsHash, paper.timestamp);
+        return (paper.author, paper.ipfsHash, paper.timestamp, paper.aiVerified, paper.qualityScore);
     }
     
-    /**
-     * @dev Get all research IDs by user
-     */
     function getUserResearch(address _user) external view returns (uint256[] memory) {
         return userResearchIds[_user];
     }
-
-
+    
     // CODE GRADING FUNCTIONS
-  
-    /**
-     * @dev Submit code (only score on-chain, full feedback in IPFS)
-     * @param _ipfsHash IPFS hash containing: code, errors, suggestions, strengths
-     * @param _score Quality score 0-100
-     */
-    function submitCode(string memory _ipfsHash, uint256 _score) external onlyRegistered returns (uint256) {
+    function submitCode(string memory _ipfsHash, uint256 _initialScore) external onlyRegistered returns (uint256) {
         require(bytes(_ipfsHash).length > 0, "Invalid IPFS hash");
-        require(_score <= 100, "Score must be 0-100");
+        require(_initialScore <= 100, "Score must be 0-100");
         
         totalCodeSubmissions++;
         uint256 id = totalCodeSubmissions;
@@ -170,93 +174,135 @@ contract AcaWise {
             id: id,
             developer: msg.sender,
             ipfsHash: _ipfsHash,
-            qualityScore: _score,
+            qualityScore: _initialScore,
             timestamp: block.timestamp,
-            exists: true
+            exists: true,
+            aiGraded: false,
+            aiScore: 0
         });
         
         userCodeIds[msg.sender].push(id);
         users[msg.sender].codeSubmissionCount++;
         
-        emit CodeSubmitted(id, msg.sender, _ipfsHash, _score, block.timestamp);
+        emit CodeSubmitted(id, msg.sender, _ipfsHash);
         return id;
     }
     
-    /**
-     * @dev Get code submission by ID
-     */
+    function gradeCode(uint256 _id, uint256 _aiScore) external onlyAIService {
+        require(codeSubmissions[_id].exists, "Submission not found");
+        require(_aiScore <= 100, "Invalid score");
+        require(!codeSubmissions[_id].aiGraded, "Already graded");
+        
+        CodeSubmission storage submission = codeSubmissions[_id];
+        submission.aiGraded = true;
+        submission.aiScore = _aiScore;
+        
+        totalAIVerifications++;
+        _updateReputation(submission.developer, _aiScore);
+        
+        emit CodeGraded(_id, _aiScore, block.timestamp);
+    }
+    
     function getCodeSubmission(uint256 _id) external view returns (
         address developer,
         string memory ipfsHash,
         uint256 score,
-        uint256 timestamp
+        uint256 timestamp,
+        bool aiGraded,
+        uint256 aiScore
     ) {
         require(codeSubmissions[_id].exists, "Submission not found");
         CodeSubmission memory submission = codeSubmissions[_id];
-        return (submission.developer, submission.ipfsHash, submission.qualityScore, submission.timestamp);
+        return (
+            submission.developer,
+            submission.ipfsHash,
+            submission.qualityScore,
+            submission.timestamp,
+            submission.aiGraded,
+            submission.aiScore
+        );
     }
     
-    /**
-     * @dev Get all code submission IDs by user
-     */
     function getUserCodeSubmissions(address _user) external view returns (uint256[] memory) {
         return userCodeIds[_user];
     }
     
-    /**
-     * @dev Get average code score for user (calculated on-demand)
-     */
     function getUserAverageScore(address _user) external view returns (uint256) {
         uint256[] memory ids = userCodeIds[_user];
         if (ids.length == 0) return 0;
         
         uint256 total = 0;
         for (uint256 i = 0; i < ids.length; i++) {
-            total += codeSubmissions[ids[i]].qualityScore;
+            CodeSubmission memory submission = codeSubmissions[ids[i]];
+            uint256 scoreToUse = submission.aiGraded ? submission.aiScore : submission.qualityScore;
+            total += scoreToUse;
         }
         return total / ids.length;
     }
     
-
-    // STATS FUNCTIONS
+    function _updateReputation(address _user, uint256 _score) internal {
+        User storage user = users[_user];
+        uint256 totalSubmissions = user.researchCount + user.codeSubmissionCount;
+        
+        if (totalSubmissions > 0) {
+            user.reputationScore = (user.reputationScore * (totalSubmissions - 1) + _score) / totalSubmissions;
+        } else {
+            user.reputationScore = _score;
+        }
+        
+        emit ReputationUpdated(_user, user.reputationScore);
+    }
     
-    /**
-     * @dev Get user statistics
-     */
+    // STATS FUNCTIONS
     function getUserStats(address _user) external view returns (
         bool registered,
         uint256 registrationDate,
         uint256 researchCount,
-        uint256 codeCount
+        uint256 codeCount,
+        uint256 reputation
     ) {
         User memory user = users[_user];
         return (
             user.isRegistered,
             user.registrationDate,
             user.researchCount,
-            user.codeSubmissionCount
+            user.codeSubmissionCount,
+            user.reputationScore
         );
     }
     
-    /**
-     * @dev Get platform statistics
-     */
     function getPlatformStats() external view returns (
         uint256 users_,
         uint256 research_,
-        uint256 code_
+        uint256 code_,
+        uint256 aiVerifications_
     ) {
-        return (totalUsers, totalResearchPapers, totalCodeSubmissions);
+        return (totalUsers, totalResearchPapers, totalCodeSubmissions, totalAIVerifications);
     }
     
-
     // ADMIN FUNCTIONS
-
-    /**
-     * @dev Transfer ownership
-     */
+    function setAIServiceAddress(address _newService) external onlyOwner {
+        require(_newService != address(0), "Invalid address");
+        aiServiceAddress = _newService;
+        emit AIServiceUpdated(_newService);
+    }
+    
     function transferOwnership(address _newOwner) external onlyOwner {
         require(_newOwner != address(0), "Invalid address");
         owner = _newOwner;
+    }
+    
+    function manualVerify(uint256 _researchId, uint256 _score) external onlyOwner {
+        require(researchPapers[_researchId].exists, "Research not found");
+        researchPapers[_researchId].aiVerified = true;
+        researchPapers[_researchId].qualityScore = _score;
+        totalAIVerifications++;
+    }
+    
+    function manualGrade(uint256 _codeId, uint256 _score) external onlyOwner {
+        require(codeSubmissions[_codeId].exists, "Submission not found");
+        codeSubmissions[_codeId].aiGraded = true;
+        codeSubmissions[_codeId].aiScore = _score;
+        totalAIVerifications++;
     }
 }
