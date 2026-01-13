@@ -11,10 +11,11 @@ contract AcaWise {
     // STATE VARIABLES
     
     address public owner;
+    address public aiOracleAddress; //AI Oracle Address
     uint256 public totalUsers;
     uint256 public totalResearchPapers;
     uint256 public totalCodeSubmissions;
-    
+    uint256 public totalAIAnalyses;
 
     // STRUCTS (Minimal on-chain data)
     
