@@ -26,6 +26,17 @@ Create a unified workspace that merges research, coding, and progress tracking i
 # Proposed Solution
 AcaWise solves these challenges by integrating advanced AI models to assist with research, code evaluation, and learning recommendations. The platform allows users to generate structured academic notes, receive code analysis, and track progress through a local dashboard that saves data safely within the browser. By combining these features, AcaWise enables efficient, intelligent, and continuous learning.
 
+# Blockchain Integration (Mantle)
+AcaWise leverages the Mantle Network to introduce transparency, trust, and verifiable academic interactions within the platform. Core on-chain components are deployed on Mantle Sepolia, ensuring low-cost transactions and scalability while maintaining security.
+
+The smart contract handles:
+
+- On-chain verification of academic and developer activities
+- Immutable logging of key user actions for integrity and trust
+- Transparent interaction records that can be publicly audited
+
+Mantle was chosen due to its high throughput, low fees, and EVM compatibility, making it ideal for scalable education-focused decentralized applications. Off-chain AI processing is seamlessly integrated with on-chain verification to deliver a hybrid Web2–Web3 experience without compromising usability.
+
 # Key Features
 
 ### Research Assistant  
@@ -34,8 +45,8 @@ Generate structured research papers and notes, export them as PDF, TXT, or Markd
 ### Code Grading & Feedback  
 Receive instant syntax checks, code quality analysis, improvement suggestions, and strength evaluations.
 
-### Student Q&A (Coming Soon)  
-Ask academic or coding questions and get instant AI-powered answers and personalized recommendations.
+### Peer Q&A 
+Ask academic or coding questions and get instant answers and personalized recommendations from peers.
 
 ### Activity Dashboard  
 Track and manage your research and code sessions directly in the browser, with persistent data that remains secure until reset.
@@ -93,6 +104,13 @@ AcaWise positions itself as a next-generation AI education and development tool,
 By simplifying access to AI-powered academic assistance, AcaWise increases awareness of the benefits of intelligent educational tools across global audiences.
 
 ---
+## Smart Contract Deployment
+
+```
+Network: Mantle Sepolia Testnet
+Contract Address: 0x25Cc3848b2f6fd0Fc7D180BfF67274d56775b39f
+```
+
 
 **AcaWise – Smarter Research. Better Code. Faster Learning.**
 
