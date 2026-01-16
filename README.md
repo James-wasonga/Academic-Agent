@@ -109,6 +109,7 @@ By simplifying access to AI-powered academic assistance, AcaWise increases aware
 ```
 Network: Mantle Sepolia Testnet
 Contract Address: 0x25Cc3848b2f6fd0Fc7D180BfF67274d56775b39f
+Explorer: https://sepolia.mantlescan.xyz/address/0x25cc3848b2f6fd0fc7d180bff67274d56775b39f#code
 ```
 
 
