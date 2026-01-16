@@ -27,6 +27,9 @@ Create a unified workspace that merges research, coding, and progress tracking i
 AcaWise solves these challenges by integrating advanced AI models to assist with research, code evaluation, and learning recommendations. The platform allows users to generate structured academic notes, receive code analysis, and track progress through a local dashboard that saves data safely within the browser. By combining these features, AcaWise enables efficient, intelligent, and continuous learning.
 
 # Blockchain Integration (Mantle)
+
+![mantle](https://github.com/user-attachments/assets/0813a5f5-6208-471a-94f3-ebb43972024e)
+
 AcaWise leverages the Mantle Network to introduce transparency, trust, and verifiable academic interactions within the platform. Core on-chain components are deployed on Mantle Sepolia, ensuring low-cost transactions and scalability while maintaining security.
 
 The smart contract handles:
@@ -114,6 +117,7 @@ Explorer: https://sepolia.mantlescan.xyz/address/0x25cc3848b2f6fd0fc7d180bff6727
 
 
 **AcaWise – Smarter Research. Better Code. Faster Learning.**
+
 
 
 
