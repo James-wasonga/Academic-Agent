@@ -28,7 +28,7 @@ AcaWise solves these challenges by integrating advanced AI models to assist with
 
 # Blockchain Integration (Mantle)
 
-![mantle](https://github.com/user-attachments/assets/426d9777-6677-40c1-8a93-cf9ece5bb2a7)
+<img width="1920" height="909" alt="GMantle" src="https://github.com/user-attachments/assets/2a185cea-24c1-4544-b6be-bcb7748a4208" />
 
 AcaWise leverages the Mantle Network to introduce transparency, trust, and verifiable academic interactions within the platform. Core on-chain components are deployed on Mantle Sepolia, ensuring low-cost transactions and scalability while maintaining security.
 
@@ -117,6 +117,7 @@ Explorer: https://sepolia.mantlescan.xyz/address/0x25cc3848b2f6fd0fc7d180bff6727
 
 
 **AcaWise – Smarter Research. Better Code. Faster Learning.**
+
 
 
 
