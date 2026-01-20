@@ -1492,8 +1492,6 @@ from datetime import datetime
 import os
 from dotenv import load_dotenv
 import re
-# NEW IMPORT
-# from blockchain_service import blockchain_bridge, verify_research, grade_code
 
 # -------------------- ENV --------------------
 load_dotenv()
