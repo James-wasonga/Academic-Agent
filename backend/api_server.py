@@ -1503,32 +1503,78 @@ HAS_GEMINI = bool(GEMINI_KEY and len(GEMINI_KEY) > 20)
 print(f"Port: {PORT}")
 print(f"Gemini Key: {'Available' if HAS_GEMINI else 'Missing'}")
 
+# -------------------- IMPORT BLOCKCHAIN SERVICE-----------
+try:
+    from blockchain_service import blockchain_bridge, verify_research, grade_code
+    BLOCKCHAIN_ENABLED = True
+    print(" Blockchain service imported successfully")
+except Exception as e:
+    print(f" Blockchain service not available: {e}")
+    BLOCKCHAIN_ENABLED = False
+    # Create dummy functions
+    class DummyBridge:
+        enabled = False
+    blockchain_bridge = DummyBridge()
+    def verify_research(*args, **kwargs):
+        return {"status": "disabled"}
+    def grade_code(*args, **kwargs):
+        return {"status": "disabled"}       
+
+
 # -------------------- IMPORT ROUTERS --------------------
 from api.grading import router as grading_router
 from api.chat import router as chat_router
 from api.ratings import router as ratings_router  # 🆕 NEW: Import ratings router
 
 # -------------------- FORMATTING HELPERS --------------------
+# def format_research_output(raw_text: str, query: str) -> str:
+#     formatted_text = raw_text.strip()
+    
+#     formatted_report = f"""
+# # Research Analysis: {query}
+
+# ## Executive Summary
+# {_extract_or_create_summary(formatted_text)}
+
+# ## Detailed Analysis
+# {_format_main_content(formatted_text)}
+
+# ## Key Findings
+# {_extract_key_findings(formatted_text)}
+
+# ## Conclusions and Recommendations
+# {_extract_conclusions(formatted_text)}
+
+# ## Research Methodology
+# This analysis was conducted using advanced AI language models with access to comprehensive knowledge bases, providing insights based on established research, best practices, and current industry standards.
+
+# ---
+# *Generated on {datetime.now().strftime("%B %d, %Y at %I:%M %p")}*
+# """
+#     return formatted_report.strip()
+
 def format_research_output(raw_text: str, query: str) -> str:
+    """Format research output - keep AI formatting, remove metadata"""
     formatted_text = raw_text.strip()
     
+    # Remove any metadata lines that Gemini might generate
+    lines = formatted_text.split('\n')
+    cleaned_lines = []
+    
+    for line in lines:
+        # Skip lines that look like metadata
+        line_lower = line.lower().strip()
+        if any(skip in line_lower for skip in ['date:', 'author:', 'subject:']):
+            continue
+        cleaned_lines.append(line)
+    
+    cleaned_text = '\n'.join(cleaned_lines)
+    
+    # Add title and timestamp
     formatted_report = f"""
 # Research Analysis: {query}
 
-## Executive Summary
-{_extract_or_create_summary(formatted_text)}
-
-## Detailed Analysis
-{_format_main_content(formatted_text)}
-
-## Key Findings
-{_extract_key_findings(formatted_text)}
-
-## Conclusions and Recommendations
-{_extract_conclusions(formatted_text)}
-
-## Research Methodology
-This analysis was conducted using advanced AI language models with access to comprehensive knowledge bases, providing insights based on established research, best practices, and current industry standards.
+{cleaned_text}
 
 ---
 *Generated on {datetime.now().strftime("%B %d, %Y at %I:%M %p")}*
@@ -1659,8 +1705,49 @@ def gemini_research(query: str) -> dict:
         import traceback
         traceback.print_exc()
         return fallback_research(query)
+    
+    
+# -------------------- BLOCKCHAIN-ENHANCED RESEARCH --------------------
+def gemini_research_with_blockchain(query: str) -> dict:
+    """Enhanced research with blockchain verification"""
+    # Get AI research result
+    result = gemini_research(query)
+    
+    # Calculate quality score based on word count
+    word_count = result.get("word_count", 0)
+    quality_score = min(100, max(60, int(word_count / 15)))
+    
+    # Add quality score to result
+    result["quality_score"] = quality_score
+    
+    # Verify on blockchain if enabled
+    if BLOCKCHAIN_ENABLED and blockchain_bridge.enabled:
+        try:
+            # Generate unique research ID
+            research_id = int(datetime.now().timestamp() % 100000)
+            
+            print(f"🔗 Verifying research on blockchain (ID: {research_id})...")
+            blockchain_result = verify_research(research_id, quality_score)
+            
+            # Add blockchain info to result
+            result["blockchain"] = blockchain_result
+            result["on_chain_verified"] = blockchain_result.get("status") == "success"
+            result["research_id"] = research_id
+            
+            if blockchain_result.get("status") == "success":
+                print(f"✅ Research verified on-chain!")
+        except Exception as e:
+            print(f"⚠️  Blockchain verification failed: {e}")
+            result["blockchain"] = {"status": "error", "error": str(e)}
+            result["on_chain_verified"] = False
+    else:
+        result["blockchain"] = {"status": "disabled", "reason": "Blockchain not configured"}
+        result["on_chain_verified"] = False
+    
+    return result    
 
 def fallback_research(query: str) -> dict:
+    """Fallback when AI is unavailable"""
     return {
         "topic": query,
         "summary": f"""
@@ -1677,7 +1764,8 @@ Currently unable to perform AI-powered research analysis for '{query}'. API conf
         "timestamp": datetime.now().isoformat(),
         "id": f"research_{datetime.now().timestamp()}",
         "mode": "fallback",
-        "research_quality": "limited"
+        "research_quality": "limited",
+        "word_count": 0
     }
 
 # -------------------- FASTAPI APP --------------------
@@ -1703,12 +1791,33 @@ class ResearchRequest(BaseModel):
 
 @app.post("/api/research")
 async def research_endpoint(request: ResearchRequest):
+    """Research endpoint with blockchain verification"""
     result = gemini_research(request.query)
     print(f"Research completed for: {request.query} (Mode: {result.get('mode')})")
     return result
 
+@app.get("/api/blockchain/status")
+async def blockchain_status():
+    """Get blockchain integration status"""
+    if BLOCKCHAIN_ENABLED and blockchain_bridge.enabled:
+        stats = blockchain_bridge.get_platform_stats()
+        return {
+            "enabled": True,
+            "contract_address": blockchain_bridge.contract_address,
+            "network": "Mantle Sepolia Testnet",
+            "chain_id": 5003,
+            "rpc_url": blockchain_bridge.rpc_url,
+            "stats": stats
+        }
+    else:
+        return {
+            "enabled": False,
+            "message": "Blockchain not configured. Add CONTRACT_ADDRESS and BLOCKCHAIN_PRIVATE_KEY to .env"
+        }
+
 @app.get("/api/models")
 async def list_models():
+    """List available Gemini models"""
     try:
         import google.generativeai as genai
         genai.configure(api_key=GEMINI_KEY)
@@ -1719,10 +1828,12 @@ async def list_models():
 
 @app.get("/health")
 async def health_check():
+    """Health check endpoint"""
     return {
         "status": "healthy",
         "mode": "real_ai" if HAS_GEMINI else "fallback",
         "gemini_key": HAS_GEMINI,
+        "blockchain": BLOCKCHAIN_ENABLED and blockchain_bridge.enabled,
         "endpoints": {
             "research": "/api/research",
             "grading": "/api/grading",
@@ -1733,9 +1844,11 @@ async def health_check():
 
 @app.get("/")
 async def root():
+    """Root endpoint"""
     return {
         "message": "Academic Research Agent API v2.0",
         "status": "online",
+        "blockchain_enabled": BLOCKCHAIN_ENABLED and blockchain_bridge.enabled,
         "endpoints": {
             "docs": "/docs",
             "health": "/health",
@@ -1750,5 +1863,6 @@ async def root():
 if __name__ == "__main__":
     print("🚀 Starting Academic Research Agent API v2.0...")
     print(f"🔑 Gemini AI: {'Enabled' if HAS_GEMINI else 'Disabled'}")
+    print(f"⛓️  Blockchain: {'✅ Enabled' if (BLOCKCHAIN_ENABLED and blockchain_bridge.enabled) else 'Disabled'}")
     print(f"📊 Ratings System: Enabled")  # 🆕 NEW
     uvicorn.run(app, host="0.0.0.0", port=PORT, reload=False)
